@@ -1,0 +1,25 @@
+{
+  "name": "lazecrew-batch-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kitchu0401/lazecrew-batch-service.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kitchu0401/lazecrew-batch-service/issues"
+  },
+  "homepage": "https://github.com/Kitchu0401/lazecrew-batch-service",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.1",
+    "moment": "^2.18.1",
+    "mongoose": "^4.10.4",
+    "request": "^2.81.0"
+  }
+}
