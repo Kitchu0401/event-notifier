@@ -20,6 +20,7 @@
     "cheerio": "^1.0.0-rc.1",
     "moment": "^2.18.1",
     "mongoose": "^4.10.4",
+    "node-telegram-bot-api": "^0.27.1",
     "request": "^2.81.0"
   }
 }

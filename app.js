@@ -2,6 +2,7 @@ let request = require('request')
 let cheerio = require('cheerio')
 let mongoose = require('mongoose')
 let moment = require('moment')
+// let TelegramBot = require('node-telegram-bot-api')
 
 // mongoose setup
 const db = mongoose.connection
@@ -20,8 +21,7 @@ const Event = mongoose.model(
 )
 
 const log = true
-const url = 'http://onoffmix.com/event'
-const file = 'result.html'
+const url = 'http://onoffmix.com/event?sort=latest'
 
 // 데이터를 크롤링하여 파일에 저장
 // crawl()
@@ -60,7 +60,7 @@ function startRandomInterval (task) {
 }
 
 function getRandomInterval () {
-  return parseInt(Math.random() * 5 + 8) * 1000 * 60
+  return parseInt(Math.random() * 5 + 15) * 1000 * 60
 }
 
 function ts() {
