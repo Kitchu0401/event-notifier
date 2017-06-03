@@ -1,6 +1,6 @@
-var mongoose = require('mongoose')
+const mongoose = require('mongoose')
 
-var schema = new mongoose.Schema({
+const schema = new mongoose.Schema({
   index: String,
   thumbnail: String,
   link: String,
@@ -8,4 +8,4 @@ var schema = new mongoose.Schema({
   extractTime: String
 })
 
-module.exports = mongoose.model('event', schema)
+module.exports = mongoose.model('onoffmix.event', schema)

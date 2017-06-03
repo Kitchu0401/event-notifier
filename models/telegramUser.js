@@ -1,9 +1,20 @@
-var mongoose = require('mongoose')
+const mongoose = require('mongoose')
 
-var schema = new mongoose.Schema({
+const schema = new mongoose.Schema({
   id: Number,
   tags: [String],
+  regexp: Object,
   active: Number
 })
 
-module.exports = mongoose.model('telegramUser', schema)
+// 텔레그램 사용자 스키마 공통 후처리
+schema.post('find', (docs, next) => {
+  docs.forEach((doc) => {
+    // keyword 일치 확인에 사용할 정규표현식을 추가 property 형태로 저장한다.
+    doc.regexp = new RegExp(doc.tags.join('|'), 'i')
+  })
+  
+  next()
+})
+
+module.exports = mongoose.model('telegram.user', schema)
