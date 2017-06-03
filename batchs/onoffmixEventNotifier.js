@@ -15,17 +15,7 @@ module.exports = (function () {
   
   let subscriberList = []
   
-  function loadUserInfo () {
-    return User
-      .find()
-      .then((userList) => {
-        // keyword를 등록한 사용자에 대해서만 알린다.
-        userList = userList.filter((user) => { return user.tags.length > 0 })
-
-        console.log(`[${_config.jobName}][${ts()}] Loading userInfo done with ${userList.length} users.`)
-        subscriberList = userList
-      })
-  }
+  
 
   function crawl () {
     request(_config.url, (error, response, body) => {
@@ -66,23 +56,40 @@ module.exports = (function () {
         })
     })
   }
+  
+  function loadUserInfo () {
+    return User
+      .find()
+      .then((userList) => {
+        // keyword를 등록한 사용자에 대해서만 알린다.
+        userList = userList.filter((user) => { return user.tags.length > 0 })
+
+        console.log(`[${_config.jobName}][${ts()}] Loading userInfo done with ${userList.length} users.`)
+        return userList
+      })
+  }
 
   function notifyUser (eventList) {
-    subscriberList.forEach((subscriber) => {
-      // 사용자가 등록한 키워드에 해당하는 모임정보만 알림 대상으로 처리한다.
-      let subscribedEventList = eventList.filter((event) => { return subscriber.regexp.test(event.title) })
+    // 등록된 Telegram 사용자 정보를 조회한다.
+    loadUserInfo()
+      .then((subscriberList) => {
+        subscriberList.forEach((subscriber) => {
+          // 사용자가 등록한 키워드에 해당하는 모임정보만 알림 대상으로 처리한다.
+          let subscribedEventList = eventList.filter((event) => { return subscriber.regexp.test(event.title) })
 
-      if ( subscribedEventList.length > 0 ) {
-        let messageHeader = `[${ts()}] 새로운 모임을 발견했습니다.`
-        let messageBody = subscribedEventList.map((event) => {
-            return `${event.title}\nlink: ${event.link}`
-          }).join('\n\n')
-        let message = `${messageHeader}\n\n${messageBody}`
+          if ( subscribedEventList.length > 0 ) {
+            let messageHeader = `[${ts()}]\n새로운 모임을 발견했습니다.`
+            let messageBody = subscribedEventList.map((event) => {
+                return `${event.title}\nlink: ${event.link}`
+              }).join('\n\n')
+            let message = `${messageHeader}\n\n${messageBody}`
 
-        // 텔레그램 봇을 통해 메시지를 발송한다.
-        bot.sendMessage(subscriber.id, message)
-      }
-    })
+            // 텔레그램 봇을 통해 메시지를 발송한다.
+            bot.sendMessage(subscriber.id, message)
+          }
+        })
+      })
+      .catch((error) => { console.error(error) })
   }
 
   function getRandomInterval () {
@@ -94,7 +101,7 @@ module.exports = (function () {
   }
 
   function startInterval (task) {
-    // task()
+    task()
     setTimeout(() => {
       startInterval(task)
     }, _config.fixedInterval || getRandomInterval())
@@ -102,11 +109,7 @@ module.exports = (function () {
 
   return {
     run: () => {
-      // 등록된 Telegram 사용자 정보를 조회한다.
-      loadUserInfo()
-        // 배치 작업을 수행한다.
-        .then(() => { startInterval(crawl) })
-        .catch((error) => { console.error(error) })
+      startInterval(crawl)
     }
   }
 
