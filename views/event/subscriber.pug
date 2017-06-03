@@ -29,7 +29,9 @@ html(lang='ko')
               }.bind(this))
             },
             addTag: function () {
-              if ( !this.formTag ) { return }
+              // 빈 문자열이나 이미 추가된 태그는 삽입하지 않는다.
+              if ( !this.formTag || this.user.tags.includes(this.formTag) ) { return }
+
               this.user.tags.push(this.formTag)
               this.applyTags()
 
