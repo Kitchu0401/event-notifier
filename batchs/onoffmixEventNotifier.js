@@ -13,10 +13,6 @@ module.exports = (function () {
   const _config = require('./../config')['onoffmixEventNotifier']
   const bot = new TelegramBot(_config.telegramToken)
   
-  let subscriberList = []
-  
-  
-
   function crawl () {
     request(_config.url, (error, response, body) => {
       if ( error ) { onRejected(error) }
