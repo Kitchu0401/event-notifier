@@ -78,10 +78,14 @@ module.exports = (function () {
             let messageBody = subscribedEventList.map((event) => {
                 return `${event.title}\nlink: ${event.link}`
               }).join('\n\n')
-            let message = `${messageHeader}\n\n${messageBody}`
 
+            // Markdown 형식으로 키워드를 강조한다.
+            let message = `${messageHeader}\n\n${messageBody}`
+              .replace(/\*/g, '') // preventing error
+              .replace(subscriber.regexp, '*$1*')
+            
             // 텔레그램 봇을 통해 메시지를 발송한다.
-            bot.sendMessage(subscriber.id, message)
+            bot.sendMessage(subscriber.id, message, { parse_mode: 'Markdown' })
           }
         })
       })

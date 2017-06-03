@@ -13,7 +13,7 @@ const schema = new mongoose.Schema({
 schema.post('find', (docs, next) => {
   docs.forEach((doc) => {
     // keyword 일치 확인에 사용할 정규표현식을 추가 property 형태로 저장한다.
-    doc.regexp = new RegExp(doc.tags.join('|'), 'i')
+    doc.regexp = new RegExp(`(${doc.tags.join('|')})`, 'ig')
   })
   
   next()
