@@ -1,0 +1,82 @@
+doctype html
+html(lang='ko')
+
+  head
+    title Subscriber
+    meta(charset='UTF-8' name='viewport', content='width=device-width, initial-scale=1.0')
+    link(rel='stylesheet', type='text/css', href='https://cdnjs.cloudflare.com/ajax/libs/bulma/0.4.2/css/bulma.min.css')
+    script(src='https://code.jquery.com/jquery-3.2.1.min.js', integrity='sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=', crossorigin='anonymous')
+    script(src='https://unpkg.com/vue')
+    script.
+      $(function () {
+        var app = new Vue({
+          el: '#app',
+          data () {
+            return {
+              formId: '',
+              formTag: '',
+              user: null
+            }
+          },
+          methods: {
+            login: function () {
+              $.getJSON(`/event/subscriber/${this.formId}`, function (result) {
+                if ( result.found ) {
+                  this.user = result.user
+                } else {
+                  alert('ID와 일치하는 사용자 정보가 존재하지 않습니다. 관리자에게 문의해주세요!')
+                }
+              }.bind(this))
+            },
+            addTag: function () {
+              if ( !this.formTag ) { return }
+              this.user.tags.push(this.formTag)
+              this.applyTags()
+
+              this.formTag = ''
+            },
+            removeTag: function (index) {
+              this.user.tags.splice(index, 1)
+              this.applyTags()
+            },
+            applyTags: function () {
+              $.post('/event/subscriber', { id: this.user.id, tags: this.user.tags })
+            },
+            handleKeyDown: function () {
+              console.log(this.target.value)
+            }
+          }
+        })
+      })
+
+  body
+    div#app
+      nav.nav.has-shadow
+        nav.nav-left
+          span.nav-item
+            strong 구독자 상세설정
+        nav.nav-right(v-if='user')
+          span.nav-item {{ user.first_name }}&nbsp;{{ user.last_name }}
+      div.container(style='padding: 20px;')
+        div.columns
+          div.column.is-offset-2.is-8
+
+            // Login form
+            div.level(v-if='!user')
+              div.level-item.level-center
+                div.field
+                  p.control
+                    p(style='margin-bottom: 6px; text-align: center;') Type ID and press enter!
+                    input.input(type='text', v-model='formId', v-on:keyup.enter='login')
+
+            // Logged contents
+            div.level(v-if='user')
+              div.level-item.level-center
+                div.field
+                  p.control
+                    p(style='margin-bottom: 6px; text-align: center;') Type tag and press enter!
+                    input.input(type='text', v-model='formTag', v-on:keyup.enter='addTag')
+                  
+            div(v-if='user')
+              span.tag.is-medium(style='margin-right: 6px; margin-bottom: 6px;', v-for='(tag, index) in user.tags') {{ tag }}
+                button.delete.is-small(v-on:click='removeTag(index)')

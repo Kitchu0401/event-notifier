@@ -2,6 +2,8 @@ const mongoose = require('mongoose')
 
 const schema = new mongoose.Schema({
   id: Number,
+  first_name: String,
+  last_name: String,
   tags: [String],
   regexp: Object,
   active: Number
