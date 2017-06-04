@@ -11,7 +11,9 @@ module.exports = (function () {
   const User = require('./../models/telegramUser')
   
   const _config = require('./../config')['onoffmixEventNotifier']
-  const bot = new TelegramBot(_config.telegramToken)
+  const bot = new TelegramBot(_config.telegramBotToken)
+
+  console.log(`[${_config.jobName}] TelegramBot has been initialized with token: ${_config.telegramBotToken}`)
   
   function crawl () {
     request(_config.url, (error, response, body) => {
@@ -46,9 +48,12 @@ module.exports = (function () {
         .then((resultList) => {
           // 새롭게 발견한 이벤트에 대해 작업 수행 결과를 출력하고, 후처리 로직을 호출한다.
           let newEventList = resultList.filter((result) => { return result !== null })
+          let newEventListStr = newEventList.map((event) => { return `[${_config.jobName}][${taskTs}] - ${event.title}` }).join('\n')
           
-          console.log(`[${_config.jobName}][${taskTs}] Request done with ${newEventList.length} events.`)
-          notifyUser(newEventList)
+          console.log(`[${_config.jobName}][${taskTs}] Request done with ${newEventList.length} events.\n${newEventListStr}`)
+          if ( newEventList.length > 0 ) {
+            notifyUser(newEventList)
+          }
         })
     })
   }
