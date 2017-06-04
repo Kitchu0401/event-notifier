@@ -4,9 +4,9 @@ html(lang='ko')
   head
     title Subscriber
     meta(charset='UTF-8' name='viewport', content='width=device-width, initial-scale=1.0')
-    link(href='/static/styles/bulma.min.css' rel='stylesheet', type='text/css')
-    script(src='/static/scripts/jquery-3.2.1.min.js')
-    script(src='/static/scripts/vue.min.js')
+    link(href='/event/subscriber/static/styles/bulma.min.css' rel='stylesheet', type='text/css')
+    script(src='/event/subscriber/static/scripts/jquery-3.2.1.min.js')
+    script(src='/event/subscriber/static/scripts/vue.min.js')
     script.
       $(function () {
         // Main app 선언
@@ -19,10 +19,10 @@ html(lang='ko')
               user: null,
               guidePage: 0,
               guide: [
-                { imgSrc: '/static/images/guide-0.png', content: '먼저 텔레그램에서 @OomEventNotifier를 찾아주세요.' },
-                { imgSrc: '/static/images/guide-1.png', content: '아무 메시지나 남겨주시고, 관리자에게 알려주세요.' },
-                { imgSrc: '/static/images/guide-2.png', content: '승인이 완료되면, 본 페이지에서 구독할 키워드를 추가해주세요.' },
-                { imgSrc: '/static/images/guide-3.png', content: '추가한 키워드를 포함하는 이벤트가 등록되면<br/>텔레그램 봇이 알려드립니다.' }
+                { imgSrc: '/event/subscriber/static/images/guide-0.png', content: '먼저 텔레그램에서 @OomEventNotifier를 찾아주세요.' },
+                { imgSrc: '/event/subscriber/static/images/guide-1.png', content: '아무 메시지나 남겨주시고, 관리자에게 알려주세요.' },
+                { imgSrc: '/event/subscriber/static/images/guide-2.png', content: '승인이 완료되면, 본 페이지에서 구독할 키워드를 추가해주세요.' },
+                { imgSrc: '/event/subscriber/static/images/guide-3.png', content: '추가한 키워드를 포함하는 이벤트가 등록되면<br/>텔레그램 봇이 알려드립니다.' }
               ]
             }
           },
