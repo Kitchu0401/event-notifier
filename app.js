@@ -23,7 +23,7 @@ const db = mongoose.connection
 mongoose.Promise = bluebird
 mongoose.connect('mongodb://localhost/bd')
 
-// ㅇㅇㅍㅁㅅ 이벤트 크롤링 배치 start
+// 온오프믹스 이벤트 크롤링 배치 start
 require('./batchs/onoffmixEventNotifier').run()
 
 app.listen(8080, () => {

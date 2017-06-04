@@ -18,20 +18,31 @@ html(lang='ko')
               user: null
             }
           },
+          mounted () {
+            // 직전 로그인에 성공했다면 해당 TelegramUserId를 input에 자동으로 할당한다.
+            this.formId = localStorage.getItem('eventnotifier-last-login-id') || ''
+
+            $('input[name="formId"]').focus()
+          },
           methods: {
             login: function () {
               $.getJSON(`/event/subscriber/${this.formId}`, function (result) {
                 if ( result.found ) {
+                  // 로그인시 로그인에 성공한 TelegramUserId를 로컬 저장소에 저장한다.
+                  localStorage.setItem('eventnotifier-last-login-id', result.user.id)
+
                   this.user = result.user
                   this.user.tags.sort()
+
+                  $('input[name="formId"]').focus()
                 } else {
                   alert('ID와 일치하는 사용자 정보가 존재하지 않습니다. 관리자에게 문의해주세요!')
                 }
               }.bind(this))
             },
             addTag: function () {
-              // 빈 문자열이나 이미 추가된 태그는 삽입하지 않는다.
-              if ( !this.formTag || this.user.tags.includes(this.formTag) ) { return }
+              // 2글자 이하의 문자열이나 이미 추가된 태그는 삽입하지 않는다.
+              if ( this.formTag.length < 2 || this.user.tags.includes(this.formTag) ) { return }
 
               this.user.tags.push(this.formTag)
               this.user.tags.sort()
@@ -69,7 +80,7 @@ html(lang='ko')
                 div.field
                   p.control
                     p(style='margin-bottom: 6px; text-align: center;') Type ID and press enter!
-                    input.input(type='text', v-model='formId', v-on:keyup.enter='login')
+                    input.input(type='text', name='formId', v-model='formId', v-on:keyup.enter='login')
 
             // Logged contents
             div.level(v-if='user')
@@ -77,7 +88,7 @@ html(lang='ko')
                 div.field
                   p.control
                     p(style='margin-bottom: 6px; text-align: center;') Type tag and press enter!
-                    input.input(type='text', v-model='formTag', v-on:keyup.enter='addTag')
+                    input.input(type='text', name='formTag', v-model='formTag', v-on:keyup.enter='addTag')
                   
             div(v-if='user')
               span.tag.is-medium(style='margin-right: 6px; margin-bottom: 6px;', v-for='(tag, index) in user.tags') {{ tag }}
