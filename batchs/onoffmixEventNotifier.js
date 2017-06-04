@@ -17,7 +17,10 @@ module.exports = (function () {
   
   function crawl () {
     request(_config.url, (error, response, body) => {
-      if ( error ) { onRejected(error) }
+      if ( error ) {
+        console.error(error)
+        return
+      }
 
       // Request 호출시간화초기화
       let taskTs = ts()
@@ -48,7 +51,7 @@ module.exports = (function () {
         .then((resultList) => {
           // 새롭게 발견한 이벤트에 대해 작업 수행 결과를 출력하고, 후처리 로직을 호출한다.
           let newEventList = resultList.filter((result) => { return result !== null })
-          let newEventListStr = newEventList.reduce((event) => { return `\n[${_config.jobName}][${taskTs}] - ${event.title}` }, '')
+          let newEventListStr = newEventList.reduce((str, event) => { return str + `\n[${_config.jobName}][${taskTs}] - ${event.title}` }, '')
           
           console.log(`[${_config.jobName}][${taskTs}] Request done with ${newEventList.length} events.${newEventListStr}`)
           if ( newEventList.length > 0 ) {

@@ -4,18 +4,26 @@ html(lang='ko')
   head
     title Subscriber
     meta(charset='UTF-8' name='viewport', content='width=device-width, initial-scale=1.0')
-    link(rel='stylesheet', type='text/css', href='https://cdnjs.cloudflare.com/ajax/libs/bulma/0.4.2/css/bulma.min.css')
-    script(src='https://code.jquery.com/jquery-3.2.1.min.js', integrity='sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=', crossorigin='anonymous')
-    script(src='https://unpkg.com/vue')
+    link(href='/static/styles/bulma.min.css' rel='stylesheet', type='text/css')
+    script(src='/static/scripts/jquery-3.2.1.min.js')
+    script(src='/static/scripts/vue.min.js')
     script.
       $(function () {
+        // Main app 선언
         var app = new Vue({
           el: '#app',
           data () {
             return {
               formId: '',
               formTag: '',
-              user: null
+              user: null,
+              guidePage: 0,
+              guide: [
+                { imgSrc: '/static/images/guide-0.png', content: '먼저 텔레그램에서 @OomEventNotifier를 찾아주세요.' },
+                { imgSrc: '/static/images/guide-1.png', content: '아무 메시지나 남겨주시고, 관리자에게 알려주세요.' },
+                { imgSrc: '/static/images/guide-2.png', content: '승인이 완료되면, 본 페이지에서 구독할 키워드를 추가해주세요.' },
+                { imgSrc: '/static/images/guide-3.png', content: '추가한 키워드를 포함하는 이벤트가 등록되면<br/>텔레그램 봇이 알려드립니다.' }
+              ]
             }
           },
           mounted () {
@@ -60,7 +68,20 @@ html(lang='ko')
             }
           }
         })
+
       })
+    style.
+      .nav-dot {
+        width: 11px;
+        height: 11px;
+        margin: 0px 4px;
+        border-radius: 100%;
+        display: inline-block;
+        background-color: rgba(0, 0, 0, 0.3);
+      }
+      .nav-dot.active {
+        background-color: rgba(0, 0, 0, 0.6);
+      }
 
   body
     div#app
@@ -68,8 +89,9 @@ html(lang='ko')
         nav.nav-left
           span.nav-item
             strong 구독자 상세설정
-        nav.nav-right(v-if='user')
-          span.nav-item {{ user.first_name }}&nbsp;{{ user.last_name }}
+        nav.nav-right
+          a.nav-item(href='http://onoffmix.com/')
+            strong onoffmix.com
       div.container(style='padding: 20px;')
         div.columns
           div.column.is-offset-2.is-8
@@ -79,7 +101,7 @@ html(lang='ko')
               div.level-item.level-center
                 div.field
                   p.control
-                    p(style='margin-bottom: 6px; text-align: center;') Type ID and press enter!
+                    p.is-centered(style='margin-bottom: 6px;') Type ID and press enter!
                     input.input(type='text', name='formId', v-model='formId', v-on:keyup.enter='login')
 
             // Logged contents
@@ -87,9 +109,25 @@ html(lang='ko')
               div.level-item.level-center
                 div.field
                   p.control
+                    h3.title Welcome, {{ user.first_name }} {{ user.last_name }}
                     p(style='margin-bottom: 6px; text-align: center;') Type tag and press enter!
                     input.input(type='text', name='formTag', v-model='formTag', v-on:keyup.enter='addTag')
                   
-            div(v-if='user')
-              span.tag.is-medium(style='margin-right: 6px; margin-bottom: 6px;', v-for='(tag, index) in user.tags') {{ tag }}
+            div(style='text-align: center;', v-if='user')
+              span.tag.is-medium(style='margin-right: 8px; margin-bottom: 8px;', v-for='(tag, index) in user.tags') {{ tag }}
                 button.delete.is-small(v-on:click='removeTag(index)')
+        
+        <br/>
+
+        // Guide
+        div.columns(v-if='!user')
+          div.column.is-offset-3.is-6(style='text-align: center;')
+            nav.pagination.is-centered
+              ul.pagination-list
+                li.is-small(v-for='(link, index) in guide')
+                  a.nav-dot(v-if='index !== guidePage', v-on:click='guidePage = index') 
+                  a.nav-dot.active(v-if='index === guidePage') 
+            p(style='margin: 8px 0px 12px;', v-html='guide[guidePage].content') 
+            img(style='border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 6px;', v-bind:src='guide[guidePage].imgSrc')
+            
+            

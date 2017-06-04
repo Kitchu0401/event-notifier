@@ -13,6 +13,9 @@ app.use(logger('dev'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 
+// serving static files
+app.use('/static', express.static('public'))
+
 // routers
 app.use('/event', require('./routes/onoffmixEventSubscriber'))
 
