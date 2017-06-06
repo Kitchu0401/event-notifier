@@ -64,7 +64,7 @@ html(lang='ko')
               this.applyTags()
             },
             applyTags: function () {
-              $.post('/event/subscriber', { id: this.user.id, tags: this.user.tags })
+              $.post('/event/subscriber/', { id: this.user.id, tags: this.user.tags })
             }
           }
         })
