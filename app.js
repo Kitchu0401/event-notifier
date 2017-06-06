@@ -3,8 +3,10 @@ const logger = require('morgan')
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 const bluebird = require('bluebird')
+const _config = require('./config')
 
 const app = express()
+const port = _config.port || 8080
 
 // middlewares
 app.set('view engine', 'pug')
@@ -29,6 +31,6 @@ mongoose.connect('mongodb://localhost/bd')
 // 온오프믹스 이벤트 크롤링 배치 start
 require('./batchs/onoffmixEventNotifier').run()
 
-app.listen(8080, () => {
-  console.log('Express is listening on port ' + 8080)
+app.listen(port, () => {
+  console.log('Express is listening on port ' + port)
 })
