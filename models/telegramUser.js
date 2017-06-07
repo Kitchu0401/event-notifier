@@ -4,6 +4,7 @@ const schema = new mongoose.Schema({
   id: Number,
   first_name: String,
   last_name: String,
+  username: String,
   tags: [String],
   regexp: Object,
   active: Number
