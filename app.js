@@ -29,7 +29,7 @@ mongoose.Promise = bluebird
 mongoose.connect('mongodb://localhost/bd')
 
 // 온오프믹스 이벤트 크롤링 배치 start
-require('./batchs/onoffmixEventNotifier').run()
+// require('./batchs/onoffmixEventNotifier').run()
 
 app.listen(port, () => {
   console.log('Express is listening on port ' + port)

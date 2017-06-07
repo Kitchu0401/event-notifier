@@ -12,7 +12,7 @@ html(lang='ko')
         // Main app 선언
         var app = new Vue({
           el: '#app',
-          data () {
+          data: function () {
             return {
               formId: '',
               formTag: '',
@@ -26,7 +26,7 @@ html(lang='ko')
               ]
             }
           },
-          mounted () {
+          mounted: function () {
             // 직전 로그인에 성공했다면 해당 TelegramUserId를 input에 자동으로 할당한다.
             this.formId = localStorage.getItem('eventnotifier-last-login-id') || ''
 
@@ -34,7 +34,7 @@ html(lang='ko')
           },
           methods: {
             login: function () {
-              $.getJSON(`/event/subscriber/${this.formId}`, function (result) {
+              $.getJSON('/event/subscriber/' + this.formId, function (result) {
                 if ( result.found ) {
                   // 로그인시 로그인에 성공한 TelegramUserId를 로컬 저장소에 저장한다.
                   localStorage.setItem('eventnotifier-last-login-id', result.user.id)
