@@ -19,8 +19,8 @@ router.post('/', function (req, res, next) {
       .then((found) => {
         // 사용자가 이미 등록 되어있는 경우, 사용자에게 id만 반환한다.
         if ( found ) {
-          let message = `이미 등록된 사용자입니다: *${message.chat.id}*`
-          bot.sendMessage(message.chat.id, message, { parse_mode: 'Markdown' })
+          let messageContent = `이미 등록된 사용자입니다: *${message.chat.id}*`
+          bot.sendMessage(message.chat.id, messageContent, { parse_mode: 'Markdown' })
           res.sendStatus(200)
         }
         // 등록된 사용자가 아닐 경우, 사용자를 등록 후 안내한다.
@@ -32,8 +32,8 @@ router.post('/', function (req, res, next) {
           new User(user)
             .save()
             .then((saved) => {
-              let message = `사용자 정보가 등록되었습니다: *${message.chat.id}*\nhttp://kitchu.lazecrew.com/event/subscriber 에서 모임 소식을 받아볼 키워드를 등록해주세요!`
-              bot.sendMessage(message.chat.id, message, { parse_mode: 'Markdown' })
+              let messageContent = `사용자 정보가 등록되었습니다: *${message.chat.id}*\nhttp://kitchu.lazecrew.com/event/subscriber 에서 모임 소식을 받아볼 키워드를 등록해주세요!`
+              bot.sendMessage(message.chat.id, messageContent, { parse_mode: 'Markdown' })
               res.sendStatus(200)
             })
         }
@@ -41,8 +41,8 @@ router.post('/', function (req, res, next) {
       .catch((error) => {
         console.log(message)
         console.error(error)
-        let message = `오류가 발생했습니다.\n관리자에게 문의해주세요!`
-        bot.sendMessage(message.chat.id, message, { parse_mode: 'Markdown' })
+        let messageContent = `오류가 발생했습니다.\n관리자에게 문의해주세요!`
+        bot.sendMessage(message.chat.id, messageContent, { parse_mode: 'Markdown' })
         res.sendStatus(200)
       })
   } else {
