@@ -1,21 +1,21 @@
 {
-  "name": "lazecrew-batch-service",
+  "name": "event-notifier",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Kitchu0401/lazecrew-batch-service.git"
+    "url": "https://github.com/Kitchu0401/event-notifier.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Kitchu0401/lazecrew-batch-service/issues"
+    "url": "https://github.com/Kitchu0401/event-notifier/issues"
   },
-  "homepage": "https://github.com/Kitchu0401/lazecrew-batch-service",
+  "homepage": "https://kitchu.lazecrew.com/event/subscriber",
   "dependencies": {
     "bluebird": "^3.5.0",
     "body-parser": "^1.17.2",
