@@ -49,10 +49,6 @@ router.post('/', function (req, res, next) {
     // return 200 status
     res.sendStatus(200)
   }
-
-  var message = req.body.message
-  
-  res.sendStatus(200)
 })
 
 module.exports = router

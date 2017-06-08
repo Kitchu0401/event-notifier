@@ -30,14 +30,15 @@ mongoose.Promise = bluebird
 mongoose.connect('mongodb://localhost/bd')
 
 // 온오프믹스 이벤트 크롤링 배치 start
-require('./batchs/onoffmixEventNotifier').run()
+// require('./batchs/onoffmixEventNotifier').run()
 
 app.listen(port, () => {
   console.log('Express is listening on port ' + port)
 })
 
 // 임시 Https 프로토콜 연동
-const https = require('https')
+if ( _config.useWebhook ) {
+  const https = require('https')
 const fs = require('fs')
 const _webHookConfig = _config.webHook
 const _webHookOptions = {
@@ -47,3 +48,4 @@ const _webHookOptions = {
 https.createServer(_webHookOptions, app).listen(443, () => {
   console.log('Temp https server is listening on port ' + 443)
 })
+}
