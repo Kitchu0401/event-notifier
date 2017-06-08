@@ -3,12 +3,24 @@ const path = require('path')
 const mongoose = require('mongoose')
 
 // mongoose models
+const Event = require('./../models/onoffmixEvent')
 const User = require('./../models/telegramUser')
 
 const router = express.Router()
 
 router.get('/', function (req, res, next) {
-  res.render('event/subscriber')
+  Event
+    .find()
+    .sort({ extractTime: -1 })
+    .select('title link')
+    .limit(10)
+    .then((found) => {
+      res.render('event/subscriber', { eventList: found })
+    })
+    .catch((error) => {
+      console.error(error)
+      res.render('event/subscriber')
+    })
 })
 
 router.get('/:id', function (req, res, next) {

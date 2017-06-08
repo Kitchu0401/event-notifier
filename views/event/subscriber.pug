@@ -130,5 +130,19 @@ html(lang='ko')
                   a.nav-dot.active(v-if='index === guidePage') 
             p(style='margin: 8px 0px 12px;', v-html='guide[guidePage].content') 
             img(style='border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 6px;', v-bind:src='guide[guidePage].imgSrc')
-            
-            
+        
+        // Recently registered events
+        div.columns(v-if='user')
+          div.column.is-offset-2.is-8
+            div.panel
+              div.panel-heading(style='text-align: center;') 최근 등록된 모임들
+              if eventList.length > 0
+                for event in eventList
+                  div.panel-block
+                    a(href=event.link) Link &nbsp;
+                    span #{event.title}
+              else
+                div.panel-tabs
+                  p(style='margin: 8px 0px;') 확인된 모임이 없습니다. :(
+
+              
