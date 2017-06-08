@@ -16,6 +16,7 @@ html(lang='ko')
             return {
               formId: '',
               formTag: '',
+              errorMsg: '',
               user: null,
               guidePage: 0,
               guide: [
@@ -50,8 +51,7 @@ html(lang='ko')
               }.bind(this))
             },
             addTag: function () {
-              // 2글자 이하의 문자열이나 이미 추가된 태그는 삽입하지 않는다.
-              if ( this.formTag.length < 2 || this.user.tags.includes(this.formTag) ) { return }
+              if ( this.validate() === false ) { return }
 
               this.user.tags.push(this.formTag)
               this.user.tags.sort()
@@ -66,12 +66,25 @@ html(lang='ko')
             },
             applyTags: function () {
               $.post('/event/subscriber/', { id: this.user.id, tags: this.user.tags })
+            },
+            validate: function () {
+              try {
+                if ( this.formTag.length < 2 ) throw '키워드는 2글자 이상으로 입력해주세요.'
+                if ( this.user.tags.includes(this.formTag) ) throw '이미 등록한 키워드입니다.'
+                if ( this.user.tags.length >= 5 ) throw '키워드는 50개까지 등록 가능합니다.'
+              } catch (error) {
+                clearTimeout(this.errorTimeout)
+                this.errorMsg = error
+                this.errorTimeout = setTimeout(function () { this.errorMsg = '' }.bind(this), 3000)
+                return false
+              }
             }
           }
         })
 
       })
     style.
+      /* style for dot-style pagination */
       .nav-dot {
         width: 11px;
         height: 11px;
@@ -82,6 +95,13 @@ html(lang='ko')
       }
       .nav-dot.active {
         background-color: rgba(0, 0, 0, 0.6);
+      }
+      /* style for vue.js transition */
+      .fade-enter-active, .fade-leave-active {
+        transition: opacity .5s
+      }
+      .fade-enter, .fade-leave-to {
+        opacity: 0
       }
 
   body
@@ -113,7 +133,11 @@ html(lang='ko')
                     h3.title Welcome, {{ user.first_name }} {{ user.last_name }}
                     p(style='margin-bottom: 6px; text-align: center;') Type tag and press enter!
                     input.input(type='text', name='formTag', v-model='formTag', v-on:keyup.enter='addTag')
-                  
+                  // Error message
+                  transition(name='fade', v-if='errorMsg')
+                    article.message.is-danger(style='margin-top: 6px; text-align: center;')
+                      div.message-body(style='padding: 6px;') {{ errorMsg }}
+              
             div(style='text-align: center;', v-if='user')
               span.tag.is-medium(style='margin-right: 8px; margin-bottom: 8px;', v-for='(tag, index) in user.tags') {{ tag }}
                 button.delete.is-small(v-on:click='removeTag(index)')
