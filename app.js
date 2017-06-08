@@ -37,15 +37,13 @@ app.listen(port, () => {
 })
 
 // 임시 Https 프로토콜 연동
-if ( _config.useWebhook ) {
-  const https = require('https')
+const https = require('https')
 const fs = require('fs')
 const _webHookConfig = _config.webHook
 const _webHookOptions = {
   key: fs.readFileSync(_webHookConfig.key),
   cert: fs.readFileSync(_webHookConfig.cert)
 }
-https.createServer(_webHookOptions, app).listen(443, () => {
-  console.log('Temp https server is listening on port ' + 443)
+https.createServer(_webHookOptions, app).listen(8443, () => {
+  console.log('Temp https server is listening on port ' + 8443)
 })
-}
