@@ -71,7 +71,7 @@ html(lang='ko')
               try {
                 if ( this.formTag.length < 2 ) throw '키워드는 2글자 이상으로 입력해주세요.'
                 if ( this.user.tags.includes(this.formTag) ) throw '이미 등록한 키워드입니다.'
-                if ( this.user.tags.length >= 5 ) throw '키워드는 50개까지 등록 가능합니다.'
+                if ( this.user.tags.length >= 50 ) throw '키워드는 50개까지 등록 가능합니다.'
               } catch (error) {
                 clearTimeout(this.errorTimeout)
                 this.errorMsg = error
