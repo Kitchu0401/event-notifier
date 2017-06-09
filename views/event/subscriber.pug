@@ -132,7 +132,7 @@ html(lang='ko')
                 div.field
                   p.control
                     p.is-centered(style='margin-bottom: 6px;') Type ID and press enter!
-                    input.input(type='text', name='formId', v-model='formId', v-on:keyup.enter='login')
+                    input.input(type='text', name='formId', v-model='formId', v-on:keyup.enter.stop='login')
 
             // Logged contents
             div.level(v-if='user')
