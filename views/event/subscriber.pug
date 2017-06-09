@@ -2,9 +2,10 @@ doctype html
 html(lang='ko')
 
   head
-    title Subscriber
+    title Event Notifier
     meta(charset='UTF-8' name='viewport', content='width=device-width, initial-scale=1.0')
-    link(href='/event/subscriber/static/styles/bulma.min.css' rel='stylesheet', type='text/css')
+    link(rel='stylesheet', type='text/css' href='/event/subscriber/static/styles/bulma.min.css')
+    link(rel='stylesheet', type='text/css' href='/event/subscriber/static/styles/font-awesome.min.css')
     script(src='/event/subscriber/static/scripts/jquery-3.2.1.min.js')
     script(src='/event/subscriber/static/scripts/vue.min.js')
     script.
@@ -109,7 +110,9 @@ html(lang='ko')
       nav.nav.has-shadow
         nav.nav-left
           span.nav-item
-            strong 구독자 상세설정
+            strong Event Notifier
+            a.icon(href='https://github.com/Kitchu0401/event-notifier' style='margin-left: 4px;')
+              i.fa.fa-github
         nav.nav-right
           a.nav-item(href='http://onoffmix.com/')
             strong onoffmix.com
