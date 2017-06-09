@@ -50,7 +50,7 @@ module.exports = (function () {
           // 그 외에는 null을 반환한다.
           return Event
             .findOne({ index: event.index })
-            .then((found) => { return !found ? new Event(event).save().then((saved) => { return saved }) : null })
+            .then((found) => { return !found ? new Event(event).save() : null })
         })
 
       Promise
@@ -134,20 +134,9 @@ module.exports = (function () {
     return moment().format('YYYY-MM-DD HH:mm:ss')
   }
 
-  /**
-   * 수행할 작업을 인자로 넘겨받아 무작위 간격으로 반복수행한다.
-   * @param {function} task - 반복수행할 독립 프로세스
-   */
-  function startInterval (task) {
-    task()
-    setTimeout(() => {
-      startInterval(task)
-    }, _config.fixedInterval || getRandomInterval())
-  }
-
   return {
     run: () => {
-      startInterval(crawl)
+      crawl()
     }
   }
 

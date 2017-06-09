@@ -3,6 +3,7 @@ const logger = require('morgan')
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 const bluebird = require('bluebird')
+const schedule = require('node-schedule')
 const _config = require('./config')
 
 const app = express()
@@ -29,8 +30,9 @@ const db = mongoose.connection
 mongoose.Promise = bluebird
 mongoose.connect('mongodb://localhost/bd')
 
-// 온오프믹스 이벤트 크롤링 배치 start
-require('./batchs/onoffmixEventNotifier').run()
+// 배치 프로세스 start
+// 온오프믹스 모임 정보 크롤링: 매 12분 마다 수행
+schedule.scheduleJob('*/12 * * * *', require('./batchs/onoffmixEventNotifier').run)
 
 app.listen(port, () => {
   console.log('Express is listening on port ' + port)
