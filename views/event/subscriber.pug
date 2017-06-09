@@ -141,7 +141,7 @@ html(lang='ko')
                   p.control
                     h3.title Welcome, {{ user.first_name }} {{ user.last_name }}
                     p(style='margin-bottom: 6px; text-align: center;') Type tag and press enter!
-                    input.input(type='text', name='formTag', v-model='formTag', v-on:keyup.enter='addTag')
+                    input.input(type='text', name='formTag', v-model='formTag', v-on:keyup.enter.stop='addTag')
                   // Error message
                   transition(name='fade', v-if='errorMsg')
                     article.message.is-danger(style='margin-top: 6px; text-align: center;')
