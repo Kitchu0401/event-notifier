@@ -9,18 +9,25 @@ const User = require('./../models/telegramUser')
 const router = express.Router()
 
 router.get('/', function (req, res, next) {
-  Event
-    .find()
-    .sort({ extractTime: -1 })
-    .select('title link')
-    .limit(10)
-    .then((found) => {
-      res.render('event/subscriber', { eventList: found })
+  Promise.all([
+    // 0: 최근 등록된 모임 목록
+    _getRecentEventList(),
+    // 1: 활성화된 구독자 숫자
+    _getUserCount(),
+    // 2: 등록된 키워드 목록
+    _getTagList()
+  ])
+  .then((resultList) => {
+    res.render('event/subscriber', {
+      eventList: resultList[0],
+      userCount: resultList[1],
+      tagCount: resultList[2].length
     })
-    .catch((error) => {
-      console.error(error)
-      res.render('event/subscriber')
-    })
+  })
+  .catch((error) => {
+    console.error(error)
+    res.render('event/subscriber')
+  })   
 })
 
 router.get('/:id', function (req, res, next) {
@@ -35,5 +42,17 @@ router.post('/', function (req, res, next) {
     .then((result) => { res.json({ success: true }) })
     .catch((error) => { console.error(error) })
 })
+
+function _getRecentEventList () {
+  return Event.find().sort({ extractTime: -1 }).select('title link').limit(10)
+}
+
+function _getUserCount () {
+  return User.count({ active: 1 })
+}
+
+function _getTagList () {
+  return User.distinct('tags')
+}
 
 module.exports = router

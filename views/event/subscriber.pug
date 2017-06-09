@@ -109,12 +109,18 @@ html(lang='ko')
     div#app
       nav.nav.has-shadow
         nav.nav-left
-          span.nav-item
+          span.nav-item(style='width: 160px;')
             strong Event Notifier
             a.icon(href='https://github.com/Kitchu0401/event-notifier' style='margin-left: 4px;')
               i.fa.fa-github
+        nav.nav-center.is-hidden-mobile
+          span.nav-item.has-text-centered
+            strong #{userCount} &nbsp;
+            span subscribers, &nbsp;
+            strong #{tagCount} &nbsp;
+            span keywords.
         nav.nav-right
-          a.nav-item(href='http://onoffmix.com/')
+          a.nav-item(href='http://onoffmix.com/' style='width: 160px;')
             strong onoffmix.com
       div.container(style='padding: 20px;')
         div.columns
