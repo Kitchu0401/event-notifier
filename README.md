@@ -2,7 +2,7 @@
 
 **키워드 기반**으로 모임에 대한 정보를 **텔레그램 챗봇**을 통해 알려주는 application입니다.
 
-![guide-3.png](/public/images/guide-3.png)
+![guide-4.png](/public/images/guide-4.png)
 
 # Event-source
 
