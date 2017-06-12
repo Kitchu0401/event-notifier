@@ -38,7 +38,7 @@ html(lang='ko')
           methods: {
             login: function () {
               $.getJSON('/event/subscriber/' + this.formId, function (result) {
-                if ( result.found ) {
+                if ( result.success ) {
                   // 로그인시 로그인에 성공한 TelegramUserId를 로컬 저장소에 저장한다.
                   localStorage.setItem('eventnotifier-last-login-id', result.user.id)
 
@@ -47,38 +47,65 @@ html(lang='ko')
 
                   $('input[name="formTag"]').focus()
                 } else {
-                  alert('ID와 일치하는 사용자 정보가 존재하지 않습니다. 관리자에게 문의해주세요!')
+                  alert(result.message)
                 }
               }.bind(this))
             },
             addTag: function () {
               if ( this.validate() === false ) { return }
-
-              this.user.tags.push(this.formTag)
-              this.user.tags.sort()
-              this.applyTags()
-
-              this.formTag = ''
+              
+              let id = this.user.id
+              let tag = this.formTag
+              
+              $.ajax({
+                url: '/event/subscriber/tag',
+                type: 'PUT',
+                dataType: 'json',
+                data: { id: id, tag: tag }
+              })
+              .done(function (result) {
+                if ( result.success ) {
+                  this.user.tags.push(this.formTag)
+                  this.user.tags.sort()
+                  this.formTag = ''
+                } else {
+                  this.showError(result.message)
+                }
+              }.bind(this))
             },
             removeTag: function (index) {
-              this.user.tags.splice(index, 1)
-              this.user.tags.sort()
-              this.applyTags()
-            },
-            applyTags: function () {
-              $.post('/event/subscriber/', { id: this.user.id, tags: this.user.tags })
+              let id = this.user.id
+              let tag = this.user.tags[index]
+              
+              $.ajax({
+                url: '/event/subscriber/tag',
+                type: 'DELETE',
+                dataType: 'json',
+                data: { id: id, tag: tag }
+              })
+              .done(function (result) {
+                if ( result.success ) {
+                  this.user.tags.splice(index, 1)
+                  this.user.tags.sort()
+                } else {
+                  this.showError(result.message)
+                }
+              }.bind(this))
             },
             validate: function () {
               try {
-                if ( this.formTag.length < 2 ) throw '키워드는 2글자 이상으로 입력해주세요.'
+                if ( this.formTag.length < 2 || this.formTag.length > 10 ) throw '키워드는 2글자 이상 10글자 이하로 입력해주세요.'
                 if ( this.user.tags.includes(this.formTag) ) throw '이미 등록한 키워드입니다.'
                 if ( this.user.tags.length >= 50 ) throw '키워드는 50개까지 등록 가능합니다.'
               } catch (error) {
-                clearTimeout(this.errorTimeout)
-                this.errorMsg = error
-                this.errorTimeout = setTimeout(function () { this.errorMsg = '' }.bind(this), 3000)
+                this.showError(error)
                 return false
               }
+            },
+            showError: function (message) {
+              clearTimeout(this.errorTimeout)
+              this.errorMsg = message
+              this.errorTimeout = setTimeout(function () { this.errorMsg = '' }.bind(this), 3000)
             }
           }
         })
@@ -139,7 +166,7 @@ html(lang='ko')
               div.level-item.level-center
                 div.field
                   p.control
-                    h3.title Welcome, {{ user.first_name }} {{ user.last_name }}
+                    h3.title(style='text-align: center;') Welcome, {{ user.first_name }} {{ user.last_name }}
                     p(style='margin-bottom: 6px; text-align: center;') Type tag and press enter!
                     input.input(type='text', name='formTag', v-model='formTag', v-on:keyup.enter.stop='addTag')
                   // Error message

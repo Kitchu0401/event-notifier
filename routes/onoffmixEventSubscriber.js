@@ -31,20 +31,78 @@ router.get('/', function (req, res, next) {
 })
 
 router.get('/:id', function (req, res, next) {
-  User
-    .findOne({ id: isNaN(req.params.id) ? '' : parseInt(req.params.id) })
-    .then((found) => { res.json({ found: found !== null, user: found }) })
+  let id = isNaN(req.params.id) ? '' : parseInt(req.params.id)
+
+  _getUser(id)
+    .then((found) => {
+      if ( !found ) {
+        res.send({
+          success: false,
+          message: 'ID와 일치하는 사용자 정보가 존재하지 않습니다. 관리자에게 문의해주세요!'
+        })
+      } else {
+        res.send({
+          success: true,
+          user: found
+        })
+      }
+    })
+    .catch((error) => {
+      console.error(error)
+      res.sendStatus(404)
+    })
 })
 
-router.post('/', function (req, res, next) {
-  User
-    .findOneAndUpdate({ id: req.body['id'] }, { $set: { tags: req.body['tags[]'] } })
-    .then((result) => { res.json({ success: true }) })
-    .catch((error) => { console.error(error) })
+router.put('/tag', function (req, res, next) {
+  let id = req.body['id']
+  let tag = req.body['tag']
+
+  // 문자열 only validation
+  tag = typeof tag === 'string' ? tag : ''
+
+  _getUser(id)
+    .then((found) => {
+      if      ( tag.length < 2 || tag.length > 10 ) { res.send(_getCommonErrorObj('키워드는 2글자 이상 10글자 이하로 입력해주세요.')) }
+      else if ( !found ) { res.send(_getCommonErrorObj('ID와 일치하는 사용자 정보가 존재하지 않습니다. 관리자에게 문의해주세요!')) }
+      else if ( found.tags.length >= 50 ) { res.send(_getCommonErrorObj('키워드는 50개까지 등록 가능합니다.')) }
+      else if ( found.tags.includes(tag) ) { res.send(_getCommonErrorObj('이미 등록한 키워드입니다.')) }
+      else {
+        User
+          .findOneAndUpdate({ id: id }, { $push: { tags: tag } })
+          .then((result) => { res.send({ success: true }) })
+      }
+    })
+    .catch((error) => {
+      console.error(error)
+      res.sendStatus(404)
+    })
+})
+
+router.delete('/tag', function (req, res, next) {
+  let id = req.body['id']
+  let tag = req.body['tag']
+
+  _getUser(id)
+    .then((found) => {
+      if ( !found ) { res.send(_getCommonErrorObj('ID와 일치하는 사용자 정보가 존재하지 않습니다. 관리자에게 문의해주세요!')) }
+      else {
+        User
+          .findOneAndUpdate({ id: id }, { $pull: { tags: tag } })
+          .then((result) => { res.send({ success: true }) })
+      }
+    })
+    .catch((error) => {
+      console.error(error)
+      res.sendStatus(404)
+    })
 })
 
 function _getRecentEventList () {
   return Event.find().sort({ extractTime: -1 }).select('title link').limit(10)
+}
+
+function _getUser (id) {
+  return User.findOne({ id: id })
 }
 
 function _getUserCount () {
@@ -53,6 +111,13 @@ function _getUserCount () {
 
 function _getTagList () {
   return User.distinct('tags')
+}
+
+function _getCommonErrorObj(message) {
+  return {
+    success: false,
+    message: message
+  }
 }
 
 module.exports = router
