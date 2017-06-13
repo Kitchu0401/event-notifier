@@ -15,7 +15,7 @@
   "bugs": {
     "url": "https://github.com/Kitchu0401/event-notifier/issues"
   },
-  "homepage": "https://kitchu.lazecrew.com/event/subscriber",
+  "homepage": "http://kitchu.lazecrew.com/event/subscriber",
   "dependencies": {
     "bluebird": "^3.5.0",
     "body-parser": "^1.17.2",
