@@ -10,6 +10,20 @@ const schema = new mongoose.Schema({
   active: Number
 })
 
+class TelegramUser {
+  static getUser (id) {
+    return this.findOne({ id: id })
+  }
+
+  static getUserCount () {
+    return this.count({ active: 1 })
+  }
+
+  static getTagList () {
+    return this.distinct('tags')
+  }
+}
+
 // 텔레그램 사용자 스키마 공통 후처리
 schema.post('find', (docs, next) => {
   docs.forEach((doc) => {
@@ -20,4 +34,5 @@ schema.post('find', (docs, next) => {
   next()
 })
 
+schema.loadClass(TelegramUser)
 module.exports = mongoose.model('telegram.user', schema)

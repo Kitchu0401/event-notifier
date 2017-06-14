@@ -11,11 +11,11 @@ const router = express.Router()
 router.get('/', function (req, res, next) {
   Promise.all([
     // 0: 최근 등록된 모임 목록
-    _getRecentEventList(),
+    Event.getRecentEventList(),
     // 1: 활성화된 구독자 숫자
-    _getUserCount(),
+    User.getUserCount(),
     // 2: 등록된 키워드 목록
-    _getTagList()
+    User.getTagList()
   ])
   .then((resultList) => {
     res.render('event/subscriber', {
@@ -33,7 +33,7 @@ router.get('/', function (req, res, next) {
 router.get('/:id', function (req, res, next) {
   let id = isNaN(req.params.id) ? '' : parseInt(req.params.id)
 
-  _getUser(id)
+  User.getUser(id)
     .then((found) => {
       if ( !found ) {
         res.send({
@@ -60,7 +60,7 @@ router.put('/tag', function (req, res, next) {
   // 문자열 only validation
   tag = typeof tag === 'string' ? tag : ''
 
-  _getUser(id)
+  User.getUser(id)
     .then((found) => {
       if      ( tag.length < 2 || tag.length > 10 ) { res.send(_getCommonErrorObj('키워드는 2글자 이상 10글자 이하로 입력해주세요.')) }
       else if ( !found ) { res.send(_getCommonErrorObj('ID와 일치하는 사용자 정보가 존재하지 않습니다. 관리자에게 문의해주세요!')) }
@@ -82,7 +82,7 @@ router.delete('/tag', function (req, res, next) {
   let id = req.body['id']
   let tag = req.body['tag']
 
-  _getUser(id)
+  User.getUser(id)
     .then((found) => {
       if ( !found ) { res.send(_getCommonErrorObj('ID와 일치하는 사용자 정보가 존재하지 않습니다. 관리자에게 문의해주세요!')) }
       else {
@@ -96,22 +96,6 @@ router.delete('/tag', function (req, res, next) {
       res.sendStatus(404)
     })
 })
-
-function _getRecentEventList () {
-  return Event.find().sort({ extractTime: -1 }).select('title link').limit(10)
-}
-
-function _getUser (id) {
-  return User.findOne({ id: id })
-}
-
-function _getUserCount () {
-  return User.count({ active: 1 })
-}
-
-function _getTagList () {
-  return User.distinct('tags')
-}
 
 function _getCommonErrorObj(message) {
   return {
