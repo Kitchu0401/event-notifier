@@ -1,5 +1,6 @@
 module.exports = (function () {
 
+  const axios = require('axios')
   const request = require('request')
   const $ = require('cheerio')
   const mongoose = require('mongoose')
@@ -18,7 +19,39 @@ module.exports = (function () {
   console.log(`[${_config.jobName}] TelegramBot has been initialized with token: ${_config.telegramBotToken}`)
 
   /**
+   * 모임 정보 API를 호출하여 최신 등록된 모임 목록을 반환한다.
+   */
+  function requestEventInfo () {
+    const url = _config.url
+    const options = { 
+      headers: {
+        'Host': 'onoffmix.com',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    }
+
+    return new Promise((onFulfilled, onRejected) => {
+      axios.get(url, options)
+        .then((result) => {
+          let eventList = result.data.eventList.map((event) => {
+            return {
+              index: event.idx,
+              thumbnail: event.bannerUrl,
+              link: event.eventUrl,
+              title: event.title,
+              extractTime: taskTs,
+              source: 'onoffmix.com'
+            }
+          })
+
+          onFulfilled(eventList)
+        })
+    })
+  }
+
+  /**
    * 모임 정보 사이트를 크롤링하여 모임 목록을 반환한다.
+   * @deprecated requestApi() api 호출로 변경
    */
   function crawl () {
     return new Promise((onFulfilled, onRejected) => {
@@ -60,7 +93,7 @@ module.exports = (function () {
           // 그 외에는 null을 반환한다.
           return Event
             .findOne({ index: event.index })
-            .then((found) => { return /*!found*/ true ? new Event(event).save() : null })
+            .then((found) => { return !found ? new Event(event).save() : null })
         })
       
       Promise
@@ -105,11 +138,11 @@ module.exports = (function () {
               .replace(subscriber.regexp, '*$1*')
             
             // 텔레그램 봇을 통해 모임 안내 메시지를 발송한다.
-            // bot.sendMessage(subscriber.id, message, { parse_mode: 'Markdown' })
+            bot.sendMessage(subscriber.id, message, { parse_mode: 'Markdown' })
           }
         })
 
-        console.log(`[${_config.jobName}][${ts()}] Job is done.`)
+        console.log(`[${_config.jobName}][${ts()}] Job has been done.`)
       })
   }
   
@@ -148,9 +181,9 @@ module.exports = (function () {
     run: () => {
       // 작업 호출시간 초기화
       taskTs = ts()
-      console.log(`[${_config.jobName}][${taskTs}] Job started.`)
+      console.log(`[${_config.jobName}][${taskTs}] Job has been started.`)
 
-      crawl()
+      requestEventInfo()
         .then(postExtract)
         .then(notifyUser)
         .catch((error) => {
