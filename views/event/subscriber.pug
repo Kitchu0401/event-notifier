@@ -51,6 +51,16 @@ html(lang='ko')
                 }
               }.bind(this))
             },
+            loadTagList: function (e) {
+              let code = e.which || e.keyCode
+              if ( code !== 13 && code !== 9 ) {
+                this.formTag = e.target.value
+
+                console.log(code)
+                console.log(this.formTag)
+                console.log(e.target.value)
+              }
+            },
             addTag: function () {
               if ( this.validate() === false ) { return }
               
@@ -169,6 +179,7 @@ html(lang='ko')
                     h3.title(style='text-align: center;') Welcome, {{ user.first_name }} {{ user.last_name }}
                     p(style='margin-bottom: 6px; text-align: center;') Type tag and press enter!
                     input.input(type='text', name='formTag', v-model='formTag', v-on:keyup.enter.stop='addTag')
+                    // input.input(type='text', name='formTag', v-model='formTag', v-on:keyup='loadTagList', v-on:keyup.enter.stop='addTag')
                   // Error message
                   transition(name='fade', v-if='errorMsg')
                     article.message.is-danger(style='margin-top: 6px; text-align: center;')
