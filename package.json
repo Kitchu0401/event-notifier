@@ -17,6 +17,7 @@
   },
   "homepage": "http://kitchu.lazecrew.com/event/subscriber",
   "dependencies": {
+    "axios": "^0.16.2",
     "bluebird": "^3.5.0",
     "body-parser": "^1.17.2",
     "cheerio": "^1.0.0-rc.1",
