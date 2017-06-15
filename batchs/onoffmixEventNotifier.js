@@ -124,11 +124,7 @@ module.exports = (function () {
         subscriberList.forEach((subscriber) => {
           // 사용자가 등록한 키워드에 해당하는 모임정보만 알림 대상으로 처리한다.
           let subscribedEventList = eventList.filter((event) => {
-            // Temp
-            // return subscriber.regexp.test(event.title)
-            return subscriber.tags.some((tag) => {
-              return event.title.includes(tag)
-            })
+            return subscriber.regexp.test(event.title)
           })
 
           if ( subscribedEventList.length > 0 ) {
@@ -140,9 +136,8 @@ module.exports = (function () {
 
             // Markdown 형식으로 키워드를 강조한다.
             let message = `${messageHeader}\n\n${messageBody}`
-              // Temp
-              // .replace(/\*/g, '') // preventing error
-              // .replace(subscriber.regexp, '*$1*')
+              .replace(/\*/g, '') // preventing error
+              .replace(subscriber.regexp, '*$1*')
             
             // 텔레그램 봇을 통해 모임 안내 메시지를 발송한다.
             bot.sendMessage(subscriber.id, message, { parse_mode: 'Markdown' })
