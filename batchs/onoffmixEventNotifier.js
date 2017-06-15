@@ -39,8 +39,9 @@ module.exports = (function () {
               thumbnail: event.bannerUrl,
               link: event.eventUrl,
               title: event.title,
+              content: event.abstract.replace(/\r\n/g, ' '),
               extractTime: taskTs,
-              source: 'onoffmix.com'
+              source: _config.source
             }
           })
 
@@ -89,11 +90,13 @@ module.exports = (function () {
   function postExtract (eventList) {
     return new Promise((onFulfilled, onRejected) => {
       let savePromises = eventList.map((event) => {
-          // 새롭게 발견한 이벤트에 대해 save Promise를
-          // 그 외에는 null을 반환한다.
           return Event
             .findOne({ index: event.index })
-            .then((found) => { return !found ? new Event(event).save() : null })
+            .then((found) => {
+              // 새롭게 등록되었거나 제목이 수정된 모임 정보에 대해 save Promise를, 그 외에는 null을 반환한다.
+              let isNotifiable = !found || event.title !== found.title
+              return isNotifiable ? Event.findOneAndUpdate({ index: event.index }, event, { new: true, upsert: true }) : null
+            })
         })
       
       Promise
@@ -122,21 +125,20 @@ module.exports = (function () {
     loadUserInfo()
       .then((subscriberList) => {
         subscriberList.forEach((subscriber) => {
-          // 사용자가 등록한 키워드에 해당하는 모임정보만 알림 대상으로 처리한다.
+          // 모임 제목 또는 내용이 사용자가 등록한 키워드에 해당할 경우 알림 대상으로 처리한다.
           let subscribedEventList = eventList.filter((event) => {
-            return subscriber.regexp.test(event.title)
+            return subscriber.regexp.test(event.title) || subscriber.regexp.test(event.content)
           })
 
           if ( subscribedEventList.length > 0 ) {
             // 사용자에게 발송될 메시지 본문을 생성한다.
-            let messageHeader = `[${ts()}]\n새로운 모임을 발견했습니다.`
-            let messageBody = subscribedEventList.map((event) => {
-                return `${event.title}\nlink: ${event.link}`
-              }).join('\n\n')
+            // let messageHeader = `[${ts()}]`
+            let messageHeader = `${_config.source}\n새로운 모임을 발견했습니다.`
+            let messageBody = subscribedEventList.map(generateMessageBody).join('\n\n')
 
             // Markdown 형식으로 키워드를 강조한다.
             let message = `${messageHeader}\n\n${messageBody}`
-              .replace(/\*/g, '') // preventing error
+              .replace(/[\*\[\]]/g, '') // preventing error
               .replace(subscriber.regexp, '*$1*')
             
             // 텔레그램 봇을 통해 모임 안내 메시지를 발송한다.
@@ -154,8 +156,7 @@ module.exports = (function () {
    */
   function loadUserInfo () {
     return User
-      // 활성화되었으며,
-      // keyword를 등록한 사용자만 조회한다.
+      // 활성화되었으며, keyword를 등록한 사용자만 조회한다.
       .find({ active: 1, 'tags.0': { $exists: true } })
       .then((userList) => {
         console.log(`[${_config.jobName}][${ts()}] Loading userInfo done with ${userList.length} users.`)
@@ -164,11 +165,13 @@ module.exports = (function () {
   }
 
   /**
-   * 작업 간격으로 활용할 millisecond 단위 무작위 int 값을 반환한다.
-   * @return {number} 작업 간격
+   * 사용자에게 전송될 모임 정보를 조립하여 반환한다.
+   * @param {Object} event - 모임 정보 객체
+   * @return {String} 모임 정보 문자열
    */
-  function getRandomInterval () {
-    return parseInt(Math.ceil(Math.random() * 4) + 8) * 1000 * 60
+  function generateMessageBody (event) {
+    if ( event.content.length > 50 ) { event.content = event.content.substr(0, 50) + '..' }
+    return `${event.title}${event.content ? '\n' + event.content : ''}\nlink: ${event.link}`
   }
 
   /**

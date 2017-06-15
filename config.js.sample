@@ -9,10 +9,10 @@ module.exports = {
   onoffmixEventNotifier: {
     // 배치 프로세스 구분을 위한 Name String
     jobName: '${string-job-name}',
-    // 크롤링 대상 url (온오프믹스)
+    // 데이터 수집 원천 식별자 (알림 메시지 표기됨)
+    source: '${string-source}'
+    // 데이터 수집 대상 url (온오프믹스)
     url: '${string-url}',
-    // 배치 작업 간격 (null일 경우 동적 간격을 적용합니다)
-    //fixedInterval: number-fixed-interval,
     // 텔레그램 봇 연동을 위한 token
     telegramBotToken: '${string-telegram-bot-token}'
   }
