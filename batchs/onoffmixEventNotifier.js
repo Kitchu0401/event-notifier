@@ -28,13 +28,20 @@ module.exports = (function () {
       headers: {
         'Host': 'onoffmix.com',
         'X-Requested-With': 'XMLHttpRequest'
-      }
+      },
+      timeout: 10000
     }
 
     return axios
       .get(url, options)
-      .then((result) => {
-        return result.data.eventList.map((event) => {
+      .then((response) => {
+        if ( !response.data.eventList ) { 
+          throw {
+            response: response,
+            message: `Getting event list from API has been failed: has no event data.`
+          }
+        }
+        return response.data.eventList.map((event) => {
           return {
             index: event.idx,
             thumbnail: event.bannerUrl,
@@ -54,9 +61,14 @@ module.exports = (function () {
    * 해당 펑션에서 오류가 발생 할 경우 호출된다.
    * @return {Array} 모임 목록
    */
-  function crawl () {
+  function crawl (error) {
+    if ( error ) {
+      console.log('Error occured in requesting API with:')
+      console.log(`- ${error.message || error}`)
+      console.log('Trying alternatives: requesting crawling.')
+    }
     return new Promise((onFulfilled, onRejected) => {
-      request(_config.url, (error, response, body) => {
+      request(_config.url_crawl, (error, response, body) => {
         if ( error ) {
           onRejected(error)
         }
@@ -65,18 +77,20 @@ module.exports = (function () {
         let eventList = $('ul.todayEvent:not(.alwaysShow)', '#content', body)
           .map(function () {
             // cheerio context 내 'this'는 selector에서 선택된 가상 DOM element
-            let event = {
+            return {
               index: $(this).attr('_idx'),
               thumbnail: $(this).find('li.eventThumbnail > a > img').attr('src'),
               link: $(this).find('li.eventTitle > a').attr('href'),
               title: $(this).find('li.eventTitle > a').attr('title'),
-              extractTime: taskTs
+              extractTime: taskTs,
+              source: _config.source
             }
-
-            // title 항목이 존재하지 않는 경우 저장하지 않는다.
-            return event.title ? event : null
           })
           .get()
+          .filter((event) => {
+            // title 항목이 존재하지 않는 경우 저장하지 않는다.
+            return event.title !== undefined
+          })
 
         onFulfilled(eventList)
       })
