@@ -11,8 +11,10 @@ module.exports = {
     jobName: '${string-job-name}',
     // 데이터 수집 원천 식별자 (알림 메시지 표기됨)
     source: '${string-source}'
-    // 데이터 수집 대상 url (온오프믹스)
+    // 데이터 수집 대상 url: 온오프믹스 - api
     url: '${string-url}',
+    // [optional] 데이터 수집 대상 url: 온오프믹스 - crawling
+    url_crawl: '${string-url}',
     // 텔레그램 봇 연동을 위한 token
     telegramBotToken: '${string-telegram-bot-token}'
   }
