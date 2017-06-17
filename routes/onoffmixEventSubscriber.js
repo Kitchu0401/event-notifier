@@ -3,8 +3,8 @@ const path = require('path')
 const mongoose = require('mongoose')
 
 // mongoose models
-const Event = require('./../models/onoffmixEvent')
-const User = require('./../models/telegramUser')
+const Event = require('./../models/event')
+const User = require('./../models/user')
 
 const router = express.Router()
 

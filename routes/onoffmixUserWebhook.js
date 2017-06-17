@@ -7,7 +7,7 @@ const _config = require('./../config')['onoffmixEventNotifier']
 const bot = new TelegramBot(_config.telegramBotToken)
 
 // mongoose models
-const User = require('./../models/telegramUser')
+const User = require('./../models/user')
 
 const router = express.Router()
 

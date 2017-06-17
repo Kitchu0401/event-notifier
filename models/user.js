@@ -10,7 +10,7 @@ const schema = new mongoose.Schema({
   active: Number
 })
 
-class TelegramUser {
+class User {
   static getUser (id) {
     return this.findOne({ id: id })
   }
@@ -36,5 +36,5 @@ schema.post('find', (docs, next) => {
   next()
 })
 
-schema.loadClass(TelegramUser)
-module.exports = mongoose.model('telegram.user', schema)
+schema.loadClass(User)
+module.exports = mongoose.model('user', schema)
