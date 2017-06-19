@@ -5,7 +5,8 @@ const schema = new mongoose.Schema({
   thumbnail: String,
   link: String,
   title: String,
-  extractTime: String
+  extractTime: String,
+  source: String
 })
 
 class Event {
@@ -15,4 +16,4 @@ class Event {
 }
 
 schema.loadClass(Event)
-module.exports = mongoose.model('onoffmix.event', schema)
+module.exports = mongoose.model('event', schema)

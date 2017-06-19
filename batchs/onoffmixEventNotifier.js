@@ -8,8 +8,8 @@ module.exports = (function () {
   const TelegramBot = require('node-telegram-bot-api')
 
   // mongoose models
-  const Event = require('./../models/onoffmixEvent')
-  const User = require('./../models/telegramUser')
+  const Event = require('./../models/event')
+  const User = require('./../models/user')
   
   const _config = require('./../config')['onoffmixEventNotifier']
   const bot = new TelegramBot(_config.telegramBotToken)
