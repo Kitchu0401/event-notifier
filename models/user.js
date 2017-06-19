@@ -15,6 +15,11 @@ class User {
     return this.findOne({ id: id })
   }
 
+  // 활성화되었으며, keyword를 등록한 사용자만 조회한다.
+  static getActiveUser () {
+    return this.find({ active: 1, 'tags.0': { $exists: true } })
+  }
+
   static getUserCount () {
     return this.count({ active: 1 })
   }
