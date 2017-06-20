@@ -30,9 +30,19 @@ const db = mongoose.connection
 mongoose.Promise = bluebird
 mongoose.connect('mongodb://localhost/bd')
 
-// 배치 프로세스 start
+// *    *    *    *    *    *
+// ┬    ┬    ┬    ┬    ┬    ┬
+// │    │    │    │    │    |
+// │    │    │    │    │    └ day of week (0 - 7) (0 or 7 is Sun)
+// │    │    │    │    └───── month (1 - 12)
+// │    │    │    └────────── day of month (1 - 31)
+// │    │    └─────────────── hour (0 - 23)
+// │    └──────────────────── minute (0 - 59)
+// └───────────────────────── second (0 - 59, OPTIONAL)
+
+// 배치 프로세스 with Node-scheduler
 // 온오프믹스 모임 정보 크롤링: 매 12분 마다 수행
-schedule.scheduleJob('*/12 * * * *', require('./batchs/onoffmixEventNotifier').run)
+schedule.scheduleJob('*/12 * * * * *', require('./batchs/OnoffmixEventSource').run)
 
 app.listen(port, () => {
   console.log('Express is listening on port ' + port)

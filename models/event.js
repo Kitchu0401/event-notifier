@@ -5,6 +5,7 @@ const schema = new mongoose.Schema({
   thumbnail: String,
   link: String,
   title: String,
+  content: String,
   extractTime: String,
   source: String
 })
