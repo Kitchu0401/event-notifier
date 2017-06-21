@@ -145,7 +145,6 @@ class EventSource {
 
   call () {
     // 작업 호출시간 초기화
-    console.log(this)
     this.taskTs = this.ts()
     console.log(`[${this.jobName}][${this.taskTs}] Job has been started.`)
 
