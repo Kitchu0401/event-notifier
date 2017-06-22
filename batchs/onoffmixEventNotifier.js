@@ -4,7 +4,7 @@ module.exports = (function () {
   const request = require('request')
   const $ = require('cheerio')
   const mongoose = require('mongoose')
-  const moment = require('moment')
+  const util = require('./../util/util')
   const TelegramBot = require('node-telegram-bot-api')
 
   // mongoose models
@@ -148,7 +148,9 @@ module.exports = (function () {
             if ( subscribedEventList.length > 0 ) {
               // 사용자에게 발송될 메시지 본문을 생성한다.
               let messageHeader = `${_config.source}\n새로운 모임을 발견했습니다.`
-              let messageBody = subscribedEventList.map(generateMessageBody).join('\n\n')
+              let messageBody = subscribedEventList.map((event) => {
+                return generateMessageBody(event, subscriber.regexp)
+              }).join('\n\n')
 
               // Markdown 형식으로 키워드를 강조한다.
               let message = `${messageHeader}\n\n${messageBody}`
@@ -164,7 +166,7 @@ module.exports = (function () {
           }
         })
 
-        console.log(`[${_config.jobName}][${ts()}] Job has been done.`)
+        console.log(`[${_config.jobName}][${util.ts()}] Job has been done.`)
       })
   }
   
@@ -177,7 +179,7 @@ module.exports = (function () {
       // 활성화되었으며, keyword를 등록한 사용자만 조회한다.
       .find({ active: 1, 'tags.0': { $exists: true } })
       .then((userList) => {
-        console.log(`[${_config.jobName}][${ts()}] Loading userInfo done with ${userList.length} users.`)
+        console.log(`[${_config.jobName}][${util.ts()}] Loading userInfo done with ${userList.length} users.`)
         return userList
       })
   }
@@ -185,25 +187,18 @@ module.exports = (function () {
   /**
    * 사용자에게 전송될 모임 정보를 조립하여 반환한다.
    * @param {Object} event - 모임 정보 객체
+   * @param {Object} regexp - 사용자 태그로 구성된 정규표현식
    * @return {String} 모임 정보 문자열
    */
-  function generateMessageBody (event) {
-    if ( event.content.length > 50 ) { event.content = event.content.substr(0, 50) + '..' }
-    return `${event.title}${event.content ? '\n' + event.content : ''}\nlink: ${event.link}`
-  }
-
-  /**
-   * 로깅을 위한 Timestamp 문자열을 반환한다.
-   * @return {string} Timestamp 문자열
-   */
-  function ts () {
-    return moment().format('YYYY-MM-DD HH:mm:ss')
+  function generateMessageBody (event, regexp) {
+    let content = regexp && regexp.test(event.content) ? util.highlight(event.content, regexp) : ''
+    return `${event.title}\n${content ? content + '\n' : ''}link: ${event.link}`
   }
 
   return {
     run: () => {
       // 작업 호출시간 초기화
-      taskTs = ts()
+      taskTs = util.ts()
       console.log(`[${_config.jobName}][${taskTs}] Job has been started.`)
 
       requestEventInfo()
