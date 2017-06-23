@@ -46,10 +46,13 @@ Promise.prototype.catch = function(){ return originalCatch.apply(this, arguments
 // │    └──────────────────── minute (0 - 59)
 // └───────────────────────── second (0 - 59, OPTIONAL)
 const OnoffmixEventSource = require('./batchs/OnoffmixEventSource')
+const DevmeetupEventSource = require('./batchs/DevmeetupEventSource')
 
 // 배치 프로세스 with Node-scheduler
-// 온오프믹스 모임 정보 크롤링: 매 12분 마다 수행
-schedule.scheduleJob('*/12 * * * *', () => { new OnoffmixEventSource().call() })
+// 온오프믹스 모임 정보 수집 배치: 매 12분 마다 수행
+schedule.scheduleJob('0,12,24,36,48 * * * *', () => { new OnoffmixEventSource().call() })
+// 데브밋업 모업 정보 수집 배치: 매 12분 + 6분 마다 수행
+schedule.scheduleJob('6,18,30,42,54 * * * *', () => { new DevmeetupEventSource().call() })
 
 app.listen(port, () => {
   console.log('Express is listening on port ' + port)
