@@ -30,11 +30,11 @@ const db = mongoose.connection
 mongoose.Promise = bluebird
 mongoose.connect('mongodb://localhost/bd')
 
-var originalThen = Promise.prototype.then;
-var originalCatch = Promise.prototype.catch;
-
-Promise.prototype.then = function(){ return originalThen.apply(this, arguments); };
-Promise.prototype.catch = function(){ return originalCatch.apply(this, arguments); };
+// Promise.then, Promise.catch override for parameterizing 'this'
+var originalThen = Promise.prototype.then
+var originalCatch = Promise.prototype.catch
+Promise.prototype.then = function(){ return originalThen.apply(this, arguments) }
+Promise.prototype.catch = function(){ return originalCatch.apply(this, arguments) }
 
 // *    *    *    *    *    *
 // ┬    ┬    ┬    ┬    ┬    ┬
@@ -45,10 +45,11 @@ Promise.prototype.catch = function(){ return originalCatch.apply(this, arguments
 // │    │    └─────────────── hour (0 - 23)
 // │    └──────────────────── minute (0 - 59)
 // └───────────────────────── second (0 - 59, OPTIONAL)
+const OnoffmixEventSource = require('./batchs/OnoffmixEventSource')
 
 // 배치 프로세스 with Node-scheduler
 // 온오프믹스 모임 정보 크롤링: 매 12분 마다 수행
-schedule.scheduleJob('*/12 * * * *', () => { require('./batchs/OnoffmixEventSource')('onoffmix.com').call() })
+schedule.scheduleJob('*/12 * * * *', () => { new OnoffmixEventSource().call() })
 
 app.listen(port, () => {
   console.log('Express is listening on port ' + port)

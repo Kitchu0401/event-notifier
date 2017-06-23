@@ -9,14 +9,6 @@ const bot = new TelegramBot(config.telegramBotToken)
 class EventSource {
 
   /**
-   * EventSource 객체 생성자
-   * @param {string} jobName EventSource 식별자로 사용될 작업명
-   */
-  constructor (jobName) {
-    this.jobName = jobName || ' - '
-  }
-
-  /**
    * 최신 등록된 모임 목록을 추출한다.
    * 본 펑션 구현시 반드시 Promise 객체를 반환해야한다.
    * @return {Promise} 모임 정보 추출 작업 Promise 객체

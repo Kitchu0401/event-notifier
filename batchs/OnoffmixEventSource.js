@@ -2,10 +2,19 @@ const axios = require('axios')
 const request = require('request')
 const $ = require('cheerio')
 
-const EventSource = require('./EventSource')
+const EventSource = require('./_EventSource')
 const Event = require('./../models/event')
 
 class OnoffmixEventSource extends EventSource {
+
+  /**
+   * OnoffmixEventSource 구현체 생성자
+   * EventSource 식별자로 사용될 작업명을 정의해주는걸 권장한다.
+   */
+  constructor () {
+    super()
+    this.jobName = 'onoffmix.com'
+  }
 
   /**
    * 온오프믹스 API를 호출하여 모임 목록을 반환하는 Promise 객체를 반환한다.
@@ -96,24 +105,24 @@ class OnoffmixEventSource extends EventSource {
   postRequest (eventList) {
     return new Promise(function (onFulfilled, onRejected) {
       let savePromises = eventList.map(function (event) {
-          return Event
-            .findOne({ index: event.index })
-            .then((found) => {
-              // 새롭게 등록되었거나 제목이 수정된 모임 정보에 대해 save Promise를, 그 외에는 null을 반환한다.
-              let isNotifiable = !found || event.title !== found.title
-              return isNotifiable ? Event.findOneAndUpdate({ index: event.index }, event, { new: true, upsert: true }) : null
-            })
-        })
-      
-      Promise
-        .all(savePromises)
-        .then(function (resultList) {
-          // 새롭게 발견한 이벤트에 한해 반환한다.
-          let newEventList = resultList.filter((result) => { return result !== null })
-          let newEventListStr = newEventList.reduce((str, event) => { return str + `\n[${this.jobName}][${this.taskTs}] - ${event.title}` }, '')
-          console.log(`[${this.jobName}][${this.taskTs}] Request done with ${newEventList.length} events.${newEventListStr}`)
-          onFulfilled(newEventList)
-        }.bind(this))
+        return Event
+          .findOne({ index: event.index })
+          .then((found) => {
+            // 새롭게 등록되었거나 제목이 수정된 모임 정보에 대해 save Promise를, 그 외에는 null을 반환한다.
+            let isNotifiable = !found || event.title !== found.title
+            return isNotifiable ? Event.findOneAndUpdate({ index: event.index }, event, { new: true, upsert: true }) : null
+          })
+      })
+    
+    Promise
+      .all(savePromises)
+      .then(function (resultList) {
+        // 새롭게 발견한 이벤트에 한해 반환한다.
+        let newEventList = resultList.filter((result) => { return result !== null })
+        let newEventListStr = newEventList.reduce((str, event) => { return str + `\n[${this.jobName}][${this.taskTs}] - ${event.title}` }, '')
+        console.log(`[${this.jobName}][${this.taskTs}] Request done with ${newEventList.length} events.${newEventListStr}`)
+        onFulfilled(newEventList)
+      }.bind(this))
     }.bind(this))
   }
 
