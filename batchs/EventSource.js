@@ -2,6 +2,7 @@ const moment = require('moment')
 const User = require('./../models/user')
 const TelegramBot = require('node-telegram-bot-api')
 
+const util = require('./../util/util')
 const config = require('./../config')
 const bot = new TelegramBot(config.telegramBotToken)
 
@@ -26,17 +27,6 @@ class EventSource {
   }
 
   /**
-   * request() 펑션의 fallback 프로세스로서,
-   * 오류 발생시 후순위로 호출되어 모임 목록을 추출하기 위한 펑션을 정의한다.
-   * 본 펑션 구현시 반드시 Promise 객체를 반환해야한다.
-   * @param {Object} error request() 수행 중 발생한 예외 객체
-   * @return {Promise} 모임 정보 추출 작업 Promise 객체
-   */
-  // fallback (error) {
-  //   // return new Promise((onFulfilled, onRejected) => { onFulfilled(eventList) })
-  // }
-
-  /**
    * 모임 목록을 전달받아 후처리 작업을 수행한다.
    * 본 펑션 구현시 반드시 Promise 객체를 반환해야한다.
    * @param {Array} eventList - 모임 목록
@@ -55,11 +45,6 @@ class EventSource {
    */
   notifyUser (eventList) {
     if ( !Array.isArray(eventList) || eventList.length <= 0 ) { return }
-    
-    const generateMessageBody = (event) => {
-      if ( event.content.length > 50 ) { event.content = event.content.substr(0, 50) + '..' }
-      return `${event.title}${event.content ? '\n' + event.content : ''}\nlink: ${event.link}`
-    }
 
     // Telegram 사용자 정보를 조회한다.
     return User.getActiveUser()
@@ -73,16 +58,7 @@ class EventSource {
 
             if ( subscribedEventList.length > 0 ) {
               // 사용자에게 발송될 메시지 본문을 생성한다.
-              // let messageHeader = `${jobName}\n새로운 모임을 발견했습니다.`
-              let messageHeader = `새로운 모임을 발견했습니다.`
-              let messageBody = subscribedEventList.map(generateMessageBody).join('\n\n')
-
-              // Markdown 형식으로 키워드를 강조한다.
-              let message = `${messageHeader}\n\n${messageBody}`
-                // preventing markdown error
-                .replace(/[\*\[\]_]/g, '')
-                .replace(subscriber.regexp, '*$1*')
-              
+              let message = this.generateMessage(subscribedEventList, subscriber.regexp)
               // 텔레그램 봇을 통해 모임 안내 메시지를 발송한다.
               bot.sendMessage(subscriber.id, message, { parse_mode: 'Markdown' })
             }
@@ -95,14 +71,24 @@ class EventSource {
   }
 
   /**
-   * 사용자에게 전송될 모임 정보를 조립하여 반환한다.
-   * @param {Object} event - 모임 정보 객체
-   * @return {String} 모임 정보 문자열
+   * 모임 목록을 넘겨받아 사용자에게 전송될 알림 메시지를 조립하여 반환한다.
+   * @param {Object} event - 모임 정보 목록
+   * @param {Object} regexp - 사용자 태그로 구성된 정규표현식
+   * @return {String} 알림 메시지
    */
-  // generateMessageBody (event) {
-  //   if ( event.content.length > 50 ) { event.content = event.content.substr(0, 50) + '..' }
-  //   return `${event.title}${event.content ? '\n' + event.content : ''}\nlink: ${event.link}`
-  // }
+  generateMessage (eventList, regexp) {
+    // let messageHeader = `${jobName}\n새로운 모임을 발견했습니다.`
+    let messageHeader = `새로운 모임을 발견했습니다.`
+    let messageBody = eventList.map((event) => {
+      let content = regexp && regexp.test(event.content) ? util.highlight(event.content, regexp) : ''
+      return `${event.title}\n${content ? content + '\n' : ''}link: ${event.link}`
+    }).join('\n\n')
+    return `${messageHeader}\n\n${messageBody}`
+      // preventing markdown error
+      .replace(/[\*\[\]_]/g, '')
+      // Markdown 형식으로 키워드를 강조한다.
+      .replace(regexp, '*$1*')
+  }
 
   /**
    * 데이터를 요청하고 처리하기 위한 Promise chain을 생성하여 반환한다.
@@ -110,37 +96,15 @@ class EventSource {
    * @return {Promise} 
    */
   _initRequest () {
-    const jobName = this.jobName
-    const taskTs = this.taskTs
-
     // request
     let chain = this.request()
     // fallbacks
-    chain = typeof this.fallback === 'function' ? chain.catch(this.fallback) : chain
+    chain = typeof this.fallback === 'function' ? chain.catch(this.fallback.bind(this)) : chain
     // postRequest
-    // apply task-layer properties
-    chain = chain.then((eventList) => {
-      return eventList.map((event) => {
-        event.source = jobName
-        event.extractTime = taskTs
-        return event
-      })
-    }).then(this.postRequest)
+    chain = chain.then(this.postRequest.bind(this))
     // notifyUser
-    chain = chain.then((newEventList) => {
-      let newEventListStr = newEventList.reduce((str, event) => { return str + `\n[${jobName}][${taskTs}] - ${event.title}` }, '')
-      console.log(`[${jobName}][${taskTs}] Request done with ${newEventList.length} events.${newEventListStr}`)  
-      return newEventList
-    }).then(this.notifyUser)
+    chain = chain.then(this.notifyUser.bind(this))
     return chain
-  }
-
-  /**
-   * 로깅을 위한 Timestamp 문자열을 반환한다.
-   * @return {string} Timestamp 문자열
-   */
-  ts () {
-    return moment().format('YYYY-MM-DD HH:mm:ss')
   }
 
   call () {
@@ -155,5 +119,7 @@ class EventSource {
   }
 
 }
+
+EventSource.prototype.ts = util.ts
 
 module.exports = EventSource

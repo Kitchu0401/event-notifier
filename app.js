@@ -48,8 +48,7 @@ Promise.prototype.catch = function(){ return originalCatch.apply(this, arguments
 
 // 배치 프로세스 with Node-scheduler
 // 온오프믹스 모임 정보 크롤링: 매 12분 마다 수행
-schedule.scheduleJob('*/12 * * * *', require('./batchs/OnoffmixEventSource').run)
-// schedule.scheduleJob('*/12 * * * * *', () => { new OnoffmixEventSource('onoffmix.com').call() })
+schedule.scheduleJob('*/12 * * * *', () => { require('./batchs/OnoffmixEventSource')('onoffmix.com').call() })
 
 app.listen(port, () => {
   console.log('Express is listening on port ' + port)

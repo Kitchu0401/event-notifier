@@ -20,7 +20,6 @@ class OnoffmixEventSource extends EventSource {
       },
       timeout: 10000
     }
-    const _this = this
     return axios
       .get(url, options)
       .then(function (response) {
@@ -57,8 +56,8 @@ class OnoffmixEventSource extends EventSource {
       console.log('Trying alternatives: requesting crawling.')
     }
     const url = 'http://onoffmix.com/event?sort=latest'
-    return new Promise(function (onFulfilled, onRejected) {
-      request(url, function (error, response, body) {
+    return new Promise((onFulfilled, onRejected) => {
+      request(url, (error, response, body) => {
         if ( error ) {
           onRejected(error)
         }
@@ -71,7 +70,7 @@ class OnoffmixEventSource extends EventSource {
               index: $(this).attr('_idx'),
               thumbnail: $(this).find('li.eventThumbnail > a > img').attr('src'),
               link: $(this).find('li.eventTitle > a').attr('href'),
-              title: $(this).find('li.eventTitle > a').attr('title'),
+              title: $(this).find('li.eventTitle > a').attr('title')
             }
           })
           .get()
@@ -79,11 +78,11 @@ class OnoffmixEventSource extends EventSource {
             // title 항목이 존재하지 않는 경우 저장하지 않는다.
             return event.title !== undefined
           })
-          .forEach((event) => {
+          .map((event) => {
             event.source = this.jobName
             event.extractTime = this.taskTs
+            return event
           })
-
         onFulfilled(eventList)
       })
     })
@@ -97,14 +96,12 @@ class OnoffmixEventSource extends EventSource {
   postRequest (eventList) {
     return new Promise(function (onFulfilled, onRejected) {
       let savePromises = eventList.map(function (event) {
-          // 새롭게 발견한 이벤트에 대해 save Promise를
-          // 그 외에는 null을 반환한다.
           return Event
             .findOne({ index: event.index })
             .then((found) => {
               // 새롭게 등록되었거나 제목이 수정된 모임 정보에 대해 save Promise를, 그 외에는 null을 반환한다.
               let isNotifiable = !found || event.title !== found.title
-              return true ? Event.findOneAndUpdate({ index: event.index }, event, { new: true, upsert: true }) : null
+              return isNotifiable ? Event.findOneAndUpdate({ index: event.index }, event, { new: true, upsert: true }) : null
             })
         })
       
@@ -113,7 +110,6 @@ class OnoffmixEventSource extends EventSource {
         .then(function (resultList) {
           // 새롭게 발견한 이벤트에 한해 반환한다.
           let newEventList = resultList.filter((result) => { return result !== null })
-
           let newEventListStr = newEventList.reduce((str, event) => { return str + `\n[${this.jobName}][${this.taskTs}] - ${event.title}` }, '')
           console.log(`[${this.jobName}][${this.taskTs}] Request done with ${newEventList.length} events.${newEventListStr}`)
           onFulfilled(newEventList)
