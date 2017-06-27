@@ -45,6 +45,8 @@ class OnoffmixEventSource extends EventSource {
             link: event.eventUrl,
             title: event.title,
             content: event.abstract.replace(/\r\n/g, ' '),
+            eventStartDateTime: event.eventStartDateTime,
+            eventEndDateTime: event.eventEndDateTime,
             source: this.jobName,
             extractTime: this.taskTs
           }
