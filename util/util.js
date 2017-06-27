@@ -1,6 +1,11 @@
+const _ = require('underscore')
 const moment = require('moment')
 
 module.exports = {
+
+  promisePipe: (fncList) => {
+    _.reduce(fncList, (promise, fnc) => promise.then(fnc), Promise.resolve())
+  },
 
   highlight: (text, regexp, range = 10) => {
     let syntactics = text.split(' ')
