@@ -3,38 +3,32 @@ const axios = require('axios')
 const request = require('request')
 const $ = require('cheerio')
 
+const common = require('./source.common')
 const util = require('./../util/util')
 const Event = require('./../models/event')
 
 module.exports = (function () {
 
   let jobName = 'onoffmix.com'
-  let taskTs, logHeader, log
+  let taskTs, log
 
   function init () {
     taskTs = util.ts()
-    logHeader = `[${jobName}][${taskTs}]`
-    log = function (message) {
-      console.log(`${logHeader} ${message}`)
-    }
+    log = common.getLogger(jobName, taskTs)
   }
 
   /**
    * 온오프믹스 API를 호출하여 모임 목록을 반환하는 Promise 객체를 반환한다.
    * @return {Promise} 모임 정보 추출 작업 Promise 객체
    */
-  function requestApi () {
+  function requestData () {
     const requestUrl = 'http://onoffmix.com/_/xmlProxy/xmlProxy.ofm?url=api.onoffmix.com%2Fevent%2Flist&output=json&pageRows=12&page=1&sort=if(recruitEndDateTime-NOW()%3E0%23+1%23+0)%7CDESC%2CFIND_IN_SET(%27advance%27%23wayOfRegistration)%7CDESC%2Cidx%7CDESC&searchAll=&exclude=&numLT=&getPinCount=true&getAttendCount=true&blockAbuse=true&s=&eventStartDate=&eventEndDate='
     const requestOpt = {
       headers: {
         'Host': 'onoffmix.com',
         'X-Requested-With': 'XMLHttpRequest'
       },
-      timeout: 25000,
-      proxy: {
-        host: '168.219.61.252',
-        port: 8080
-      }
+      timeout: 25000
     }  
     return axios
       .get(requestUrl, requestOpt)
@@ -134,8 +128,9 @@ module.exports = (function () {
       log(`Job has been started.`)
 
       util.promisePipe([
-        requestApi,
-        postRequest
+        requestData,
+        postRequest,
+        common.notifyUser
       ])
     }
   }
