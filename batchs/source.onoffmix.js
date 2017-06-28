@@ -93,8 +93,8 @@ module.exports = (function () {
   }
 
   /**
-   * 모임 목록을 전달받아 모임 정보를 저장하는 Promise 객체를 반환한다.
-   * 후처리 작업을 수행하고 새롭게 발견된 모임 정보를 필터링하여 반환하는 Promise 객체를 반환한다.
+   * 모임 목록을 전달받아 모임 정보를 저장하고
+   * 새로운 모임을 필터링하여 반환하는 Promise 객체를 반환한다.
    * @param {Array} eventList - 모임 목록
    * @return {Promise} 후처리 작업 Promise 객체
    */
@@ -103,11 +103,10 @@ module.exports = (function () {
       .all(
         _.map(eventList, (event) => {
           return Event
-            .findOne({ index: event.index })
+            .findOne({ index: event.index, source: jobName })
             .then((found) => {
               // 새롭게 등록되었거나 제목이 수정된 모임 정보에 대해 save Promise를, 그 외에는 null을 반환한다.
               let isNotifiable = !found || event.title !== found.title
-              // if ( isNotifiable ) return Event.findOneAndUpdate({ index: event.index }, event, { new: true, upsert: true })
               return isNotifiable ? Event.findOneAndUpdate({ index: event.index }, event, { new: true, upsert: true }) : null
             })
         })

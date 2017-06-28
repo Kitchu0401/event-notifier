@@ -10,6 +10,7 @@
 
 추후 다른 소스를 알게되면 추가 할 수 있겠죠. 나쁜 사람 아닙니다, 크롤링을 막지 말아주세요. ヾ(;ﾟДﾟ;)ｼ
 
+- [dev-meetup.github.io](https://dev-meetup.github.io/)
 - [onoffmix.com](http://onoffmix.com/)
 
 # Usage
@@ -66,21 +67,13 @@ module.exports = {
   // 서비스 구동 포트
   port: number-port,
 
+  // 텔레그램 봇 연동을 위한 token
+  telegramBotToken: 'string-telegram-bot-token',
+
   webHook: {
     // self-signed certificate 적용을 위한 물리 key 파일 경로
     key: 'string-key-file-path',
     cert: 'string-pem-file-path'
-  },
-
-  onoffmixEventNotifier: {
-    // 배치 프로세스 구분을 위한 Name String
-    jobName: 'string-job-name',
-    // 크롤링 대상 url (온오프믹스)
-    url: 'string-url',
-    // 배치 작업 간격 (null일 경우 동적 간격을 적용합니다)
-    fixedInterval: number-fixed-interval,
-    // 텔레그램 봇 연동을 위한 token
-    telegramBotToken: 'string-telegram-bot-token'
   }
 
 }

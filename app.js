@@ -30,12 +30,6 @@ const db = mongoose.connection
 mongoose.Promise = bluebird
 mongoose.connect('mongodb://localhost/bd')
 
-// Promise.then, Promise.catch override for parameterizing 'this'
-var originalThen = Promise.prototype.then
-var originalCatch = Promise.prototype.catch
-Promise.prototype.then = function(){ return originalThen.apply(this, arguments) }
-Promise.prototype.catch = function(){ return originalCatch.apply(this, arguments) }
-
 // *    *    *    *    *    *
 // ┬    ┬    ┬    ┬    ┬    ┬
 // │    │    │    │    │    |
@@ -45,14 +39,14 @@ Promise.prototype.catch = function(){ return originalCatch.apply(this, arguments
 // │    │    └─────────────── hour (0 - 23)
 // │    └──────────────────── minute (0 - 59)
 // └───────────────────────── second (0 - 59, OPTIONAL)
-const OnoffmixEventSource = require('./batchs/OnoffmixEventSource')
-const DevmeetupEventSource = require('./batchs/DevmeetupEventSource')
+const onoffmixSource = require('./batchs/source.onoffmix')
+const devmeetupSource = require('./batchs/source.devmeetup')
 
 // 배치 프로세스 with Node-scheduler
 // 온오프믹스 모임 정보 수집 배치: 매 12분 마다 수행
-schedule.scheduleJob('0,12,24,36,48 * * * *', () => { new OnoffmixEventSource().call() })
+schedule.scheduleJob('0,12,24,36,48 * * * *', onoffmixSource.run)
 // 데브밋업 모업 정보 수집 배치: 매 12분 + 6분 마다 수행
-schedule.scheduleJob('6,18,30,42,54 * * * *', () => { new DevmeetupEventSource().call() })
+schedule.scheduleJob('6,18,30,42,54 * * * *', devmeetupSource.run)
 
 app.listen(port, () => {
   console.log('Express is listening on port ' + port)
