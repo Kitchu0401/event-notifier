@@ -4,11 +4,20 @@ const request = require('request')
 const $ = require('cheerio')
 
 const util = require('./../util/util')
+const Event = require('./../models/event')
 
 module.exports = (function () {
 
   let jobName = 'onoffmix.com'
-  let taskTs = ''
+  let taskTs, logHeader, log
+
+  function init () {
+    taskTs = util.ts()
+    logHeader = `[${jobName}][${taskTs}]`
+    log = function (message) {
+      console.log(`${logHeader} ${message}`)
+    }
+  }
 
   /**
    * 온오프믹스 API를 호출하여 모임 목록을 반환하는 Promise 객체를 반환한다.
@@ -21,7 +30,11 @@ module.exports = (function () {
         'Host': 'onoffmix.com',
         'X-Requested-With': 'XMLHttpRequest'
       },
-      timeout: 10000
+      timeout: 25000,
+      proxy: {
+        host: '168.219.61.252',
+        port: 8080
+      }
     }  
     return axios
       .get(requestUrl, requestOpt)
@@ -51,9 +64,9 @@ module.exports = (function () {
   function fallback (error) {
     const requestUrl = 'http://onoffmix.com/event?sort=latest'
     if ( error ) {
-      console.log('Error occured in requesting API with:')
-      console.log(`- ${error.message || error}`)
-      console.log('Trying alternatives: requesting crawling.')
+      log('Error occured in requesting API with:')
+      log(`- ${error.message || error}`)
+      log('Trying alternatives: requesting crawling.')
     }
     return new Promise((onResolved, onRejected) => {
       request(requestUrl, (error, response, body) => {
@@ -86,42 +99,39 @@ module.exports = (function () {
   }
 
   /**
-   * 모임 목록을 전달받아 후처리 작업을 수행하고 새롭게 발견된 모임 정보를 필터링하여 반환하는 Promise 객체를 반환한다.
+   * 모임 목록을 전달받아 모임 정보를 저장하는 Promise 객체를 반환한다.
+   * 후처리 작업을 수행하고 새롭게 발견된 모임 정보를 필터링하여 반환하는 Promise 객체를 반환한다.
    * @param {Array} eventList - 모임 목록
    * @return {Promise} 후처리 작업 Promise 객체
    */
   function postRequest (eventList) {
-    return new Promise((onResolved, onRejected) => {
-      console.log(eventList.length)
-    })
-    
-    // return new Promise(function (onFulfilled, onRejected) {
-    //   let savePromises = eventList.map(function (event) {
-    //     return Event
-    //       .findOne({ index: event.index })
-    //       .then((found) => {
-    //         // 새롭게 등록되었거나 제목이 수정된 모임 정보에 대해 save Promise를, 그 외에는 null을 반환한다.
-    //         let isNotifiable = !found || event.title !== found.title
-    //         return isNotifiable ? Event.findOneAndUpdate({ index: event.index }, event, { new: true, upsert: true }) : null
-    //       })
-    //   })
-    // 
-    // Promise
-    //   .all(savePromises)
-    //   .then(function (resultList) {
-    //     // 새롭게 발견한 이벤트에 한해 반환한다.
-    //     let newEventList = resultList.filter((result) => { return result !== null })
-    //     let newEventListStr = newEventList.reduce((str, event) => { return str + `\n[${this.jobName}][${this.taskTs}] - ${event.title}` }, '')
-    //     console.log(`[${this.jobName}][${this.taskTs}] Request done with ${newEventList.length} events.${newEventListStr}`)
-    //     onFulfilled(newEventList)
-    //   }.bind(this))
-    // }.bind(this))
+    return Promise
+      .all(
+        _.map(eventList, (event) => {
+          return Event
+            .findOne({ index: event.index })
+            .then((found) => {
+              // 새롭게 등록되었거나 제목이 수정된 모임 정보에 대해 save Promise를, 그 외에는 null을 반환한다.
+              let isNotifiable = !found || event.title !== found.title
+              // if ( isNotifiable ) return Event.findOneAndUpdate({ index: event.index }, event, { new: true, upsert: true })
+              return isNotifiable ? Event.findOneAndUpdate({ index: event.index }, event, { new: true, upsert: true }) : null
+            })
+        })
+      )
+      // 새롭게 발견한 이벤트만 반환한다.
+      .then(promiseList => _.filter(promiseList, promise => !!promise))
+      // Logging
+      .then(newEventList => {
+        let newEventListStr = newEventList.reduce((str, event) => { return str + `\n - ${event.title}` }, '')
+        log(`Request done with ${newEventList.length} events.${newEventListStr}`)
+        return newEventList
+      })
   }
   
   return {
     run: () => {
-      taskTs = util.ts()
-      console.log(`[${jobName}][${taskTs}] Job has been started.`)
+      init()
+      log(`Job has been started.`)
 
       util.promisePipe([
         requestApi,
