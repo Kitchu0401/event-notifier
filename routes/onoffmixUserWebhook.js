@@ -3,8 +3,8 @@ const path = require('path')
 const mongoose = require('mongoose')
 const TelegramBot = require('node-telegram-bot-api')
 
-const _config = require('./../config')['onoffmixEventNotifier']
-const bot = new TelegramBot(_config.telegramBotToken)
+const config = require('./../config')
+const bot = new TelegramBot(config.telegramBotToken)
 
 // mongoose models
 const User = require('./../models/user')
