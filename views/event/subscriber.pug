@@ -17,6 +17,7 @@ html(lang='ko')
             return {
               formId: '',
               formTag: '',
+              tagType: 'pos',
               errorMsg: '',
               user: null,
               guidePage: 0,
@@ -44,6 +45,7 @@ html(lang='ko')
 
                   this.user = result.user
                   this.user.tags.sort()
+                  this.user.tags_neg.sort()
 
                   $('input[name="formTag"]').focus()
                 } else {
@@ -55,58 +57,58 @@ html(lang='ko')
               let code = e.which || e.keyCode
               if ( code !== 13 && code !== 9 ) {
                 this.formTag = e.target.value
-
-                console.log(code)
-                console.log(this.formTag)
-                console.log(e.target.value)
               }
             },
             addTag: function () {
-              if ( this.validate() === false ) { return }
+              if ( this.validate(this.tagType) === false ) { return }
               
               let id = this.user.id
+              let tagType = this.tagType
               let tag = this.formTag
-              
+
               $.ajax({
                 url: '/event/subscriber/tag',
                 type: 'PUT',
                 dataType: 'json',
-                data: { id: id, tag: tag }
+                data: { id: id, tagType: tagType, tag: tag }
               })
               .done(function (result) {
                 if ( result.success ) {
-                  this.user.tags.push(this.formTag)
-                  this.user.tags.sort()
+                  let tags = tagType === 'pos' ? 'tags' : 'tags_neg'
+                  this.user[tags].push(this.formTag)
+                  this.user[tags].sort()
                   this.formTag = ''
                 } else {
                   this.showError(result.message)
                 }
               }.bind(this))
             },
-            removeTag: function (index) {
+            removeTag: function (index, tagType) {
               let id = this.user.id
-              let tag = this.user.tags[index]
+              let tags = tagType === 'pos' ? 'tags' : 'tags_neg'
+              let tag = this.user[tags][index]
               
               $.ajax({
                 url: '/event/subscriber/tag',
                 type: 'DELETE',
                 dataType: 'json',
-                data: { id: id, tag: tag }
+                data: { id: id, tagType: tagType, tag: tag }
               })
               .done(function (result) {
                 if ( result.success ) {
-                  this.user.tags.splice(index, 1)
-                  this.user.tags.sort()
+                  this.user[tags].splice(index, 1)
+                  this.user[tags].sort()
                 } else {
                   this.showError(result.message)
                 }
               }.bind(this))
             },
-            validate: function () {
+            validate: function (tagType) {
+              let tags = tagType === 'pos' ? 'tags' : 'tags_neg'
               try {
                 if ( this.formTag.length < 2 || this.formTag.length > 10 ) throw '키워드는 2글자 이상 10글자 이하로 입력해주세요.'
-                if ( this.user.tags.includes(this.formTag) ) throw '이미 등록한 키워드입니다.'
-                if ( this.user.tags.length >= 50 ) throw '키워드는 50개까지 등록 가능합니다.'
+                if ( this.user[tags].includes(this.formTag) ) throw '이미 등록한 키워드입니다.'
+                if ( this.user[tags].length >= 50 ) throw '키워드는 50개까지 등록 가능합니다.'
               } catch (error) {
                 this.showError(error)
                 return false
@@ -142,6 +144,17 @@ html(lang='ko')
       .fade-enter, .fade-leave-to {
         opacity: 0
       }
+      .button-group > .button:first-of-type {
+        border-top-right-radius: 0px;
+        border-bottom-right-radius: 0px;
+      }
+      .button-group > .button:last-of-type {
+        border-top-left-radius: 0px;
+        border-bottom-left-radius: 0px;
+      }
+      .tag-list { text-align: center; margin-bottom: .75rem; }
+      .tag-list .tag-header { padding: 6px; margin: 0px 0px 12px; color: #7a7a7a; border-bottom: 1px solid #7a7a7a; }
+      .tag-list .tag { margin-right: 8px; margin-bottom: 8px; }
 
   body
     div#app
@@ -181,14 +194,29 @@ html(lang='ko')
                     p(style='margin-bottom: 6px; text-align: center;') Type tag and press enter!
                     input.input(type='text', name='formTag', v-model='formTag', v-on:keyup.enter.stop='addTag')
                     // input.input(type='text', name='formTag', v-model='formTag', v-on:keyup='loadTagList', v-on:keyup.enter.stop='addTag')
+                    div.button-group(style='margin-top: 6px;')
+                      a.button.is-info(style='width: 50%;' value='Button #1' v-on:click='tagType = "pos"' v-bind:disabled='tagType !== "pos"')
+                        span Adding &nbsp;
+                        i.fa.fa-thumbs-o-up
+                      a.button.is-danger(style='width: 50%;' value='Button #2' v-on:click='tagType = "neg"' v-bind:disabled='tagType !== "neg"')
+                        span Adding &nbsp;
+                        i.fa.fa-thumbs-o-down
                   // Error message
                   transition(name='fade', v-if='errorMsg')
                     article.message.is-danger(style='margin-top: 6px; text-align: center;')
                       div.message-body(style='padding: 6px;') {{ errorMsg }}
-              
-            div(style='text-align: center;', v-if='user')
-              span.tag.is-medium(style='margin-right: 8px; margin-bottom: 8px;', v-for='(tag, index) in user.tags') {{ tag }}
-                button.delete.is-small(v-on:click='removeTag(index)')
+              div.tag-list(v-if='user.tags.length > 0')
+                p.tag-header
+                  span Like these keywords &nbsp;
+                    i.fa.fa-thumbs-o-up
+                span.tag.is-medium(v-for='(tag, index) in user.tags') {{ tag }}
+                  button.delete.is-small(v-on:click='removeTag(index, "pos")')
+              div.tag-list(v-if='user.tags_neg.length > 0')
+                p.tag-header
+                  span Don`t Like these keywords &nbsp;
+                    i.fa.fa-thumbs-o-down
+                span.tag.is-medium(v-for='(tag, index) in user.tags_neg') {{ tag }}
+                  button.delete.is-small(v-on:click='removeTag(index, "neg")')
         
         <br/>
 

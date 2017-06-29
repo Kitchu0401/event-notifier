@@ -27,6 +27,7 @@ router.post('/', function (req, res, next) {
         else {
           let user = message.from
           user.tags = []
+          user.tags_neg = []
           user.active = 1
 
           new User(user)
