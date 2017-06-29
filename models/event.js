@@ -6,6 +6,8 @@ const schema = new mongoose.Schema({
   link: String,
   title: String,
   content: String,
+  eventStartDateTime: String,
+  eventEndDateTime: String,
   extractTime: String,
   source: String
 })

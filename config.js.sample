@@ -1,21 +1,11 @@
 module.exports = {
    // 서비스 구동 포트
   port: '${port number}',
+  // 텔레그램 봇 연동을 위한 token
+  telegramBotToken: '${string-telegram-bot-token}',
   webHook: {
     // self-signed certificate 적용을 위한 물리 key 파일 경로
     key: '${string-key-file-path}',
     cert: '${string-pem-file-path}'
-  },
-  onoffmixEventNotifier: {
-    // 배치 프로세스 구분을 위한 Name String
-    jobName: '${string-job-name}',
-    // 데이터 수집 원천 식별자 (알림 메시지 표기됨)
-    source: '${string-source}'
-    // 데이터 수집 대상 url: 온오프믹스 - api
-    url: '${string-url}',
-    // [optional] 데이터 수집 대상 url: 온오프믹스 - crawling
-    url_crawl: '${string-url}',
-    // 텔레그램 봇 연동을 위한 token
-    telegramBotToken: '${string-telegram-bot-token}'
   }
 }
