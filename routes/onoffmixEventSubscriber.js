@@ -63,14 +63,13 @@ router.put('/tag', function (req, res, next) {
   
   User.getUser(id)
     .then((found) => {
-      let tags = tagType === 'pos' ? 'tags' : 'tags_neg'
       if      ( tag.length < 2 || tag.length > 10 ) { res.send(_getCommonErrorObj('키워드는 2글자 이상 10글자 이하로 입력해주세요.')) }
       else if ( !found ) { res.send(_getCommonErrorObj('ID와 일치하는 사용자 정보가 존재하지 않습니다. 관리자에게 문의해주세요!')) }
-      else if ( found[tags].length >= 50 ) { res.send(_getCommonErrorObj('키워드는 50개까지 등록 가능합니다.')) }
-      else if ( found[tags].includes(tag) ) { res.send(_getCommonErrorObj('이미 등록한 키워드입니다.')) }
+      else if ( found[tagType].length >= 50 ) { res.send(_getCommonErrorObj('키워드는 50개까지 등록 가능합니다.')) }
+      else if ( found[tagType].includes(tag) ) { res.send(_getCommonErrorObj('이미 등록한 키워드입니다.')) }
       else {
         User
-          .findOneAndUpdate({ 'id': id }, { $push: { [tags]: tag } })
+          .findOneAndUpdate({ 'id': id }, { $push: { [tagType]: tag } })
           .then((result) => { res.send({ success: true }) })
       }
     })
@@ -89,9 +88,8 @@ router.delete('/tag', function (req, res, next) {
     .then((found) => {
       if ( !found ) { res.send(_getCommonErrorObj('ID와 일치하는 사용자 정보가 존재하지 않습니다. 관리자에게 문의해주세요!')) }
       else {
-        let tags = tagType === 'pos' ? 'tags' : 'tags_neg'
         User
-          .findOneAndUpdate({ id: id }, { $pull: { [tags]: tag } })
+          .findOneAndUpdate({ id: id }, { $pull: { [tagType]: tag } })
           .then((result) => { res.send({ success: true }) })
       }
     })

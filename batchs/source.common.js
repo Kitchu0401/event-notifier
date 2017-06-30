@@ -52,13 +52,13 @@ module.exports = (function () {
             // 모임 제목 또는 내용이 사용자가 등록한 구독을 위한 키워드에 해당하면서,
             // 무시하고자 하는 키워드에 해당하지 않을 경우 알림 대상으로 처리한다.
             let subscribedEventList = eventList.filter((event) => {
-              return (subscriber.regexp_pos.test(event.title) || subscriber.regexp_pos.test(event.content))
-                && !(subscriber.regexp_neg.test(event.title) || subscriber.regexp_neg.test(event.content))
+              return (subscriber.regexp_tags_pos.test(event.title) || subscriber.regexp_tags_pos.test(event.content))
+                && !(subscriber.regexp_tags_neg.test(event.title) || subscriber.regexp_tags_neg.test(event.content))
             })
 
             if ( subscribedEventList.length > 0 ) {
               // 사용자에게 발송될 메시지 본문을 생성한다.
-              let message = generateMessage(subscribedEventList, subscriber.regexp_pos)
+              let message = generateMessage(subscribedEventList, subscriber.regexp_tags_pos)
               // 텔레그램 봇을 통해 모임 안내 메시지를 발송한다.
               bot.sendMessage(subscriber.id, message, { parse_mode: 'Markdown' })
             }

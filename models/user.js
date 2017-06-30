@@ -6,7 +6,7 @@ const schema = new mongoose.Schema({
   first_name: String,
   last_name: String,
   username: String,
-  tags: [String],
+  tags_pos: [String],
   tags_neg: [String],
   regexp: Object,
   active: Number
@@ -19,7 +19,7 @@ class User {
 
   // 활성화되었으며, keyword를 등록한 사용자만 조회한다.
   static getActiveUser () {
-    return this.find({ active: 1, 'tags.0': { $exists: true } })
+    return this.find({ active: 1, 'tags_pos.0': { $exists: true } })
   }
 
   static getUserCount () {
@@ -27,20 +27,19 @@ class User {
   }
 
   static getTagList () {
-    return this.distinct('tags')
+    return this.distinct('tags_pos')
   }
 }
 
 // 텔레그램 사용자 스키마 공통 후처리
 schema.post('find', (docs, next) => {
   _.each(docs, (doc) => {
-    // 정규표현식 생성을 위한 regex operator escaping
-    _.each(['tags', 'tags_neg'], (tags) => {
-      doc[tags] = _.map(doc[tags], (tag) => { return tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") })
+    _.each(['tags_pos', 'tags_neg'], (tagType) => {
+      // 정규표현식 생성을 위한 regex operator escaping
+      doc[tagType] = _.map(doc[tagType], (tag) => { return tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") })
+      // keyword 일치 확인에 사용할 정규표현식을 추가 property 형태로 저장한다.
+      doc[`regexp_${tagType}`] = new RegExp(`(${doc[tagType].join('|')})`, 'ig')
     })
-    // keyword 일치 확인에 사용할 정규표현식을 추가 property 형태로 저장한다.
-    doc.regexp_pos = new RegExp(`(${doc['tags'].join('|')})`, 'ig')
-    doc.regexp_neg = new RegExp(`(${doc['tags_neg'].join('|')})`, 'ig')
   })
   
   next()
