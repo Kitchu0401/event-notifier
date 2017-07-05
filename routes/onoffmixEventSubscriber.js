@@ -14,14 +14,16 @@ router.get('/', function (req, res, next) {
     Event.getRecentEventList(),
     // 1: 활성화된 구독자 숫자
     User.getUserCount(),
-    // 2: 등록된 키워드 목록
-    User.getTagList()
+    // 2: 등록된 구독 키워드 목록
+    User.getPosTagList(),
+    // 2: 등록된 무시 키워드 목록
+    User.getNegTagList()
   ])
   .then((resultList) => {
     res.render('event/subscriber', {
       eventList: resultList[0],
       userCount: resultList[1],
-      tagCount: resultList[2].length
+      tagCount: resultList[2].length + resultList[3].length
     })
   })
   .catch((error) => {
