@@ -51,10 +51,6 @@ if ( env.batch != 'false' ) {
   schedule.scheduleJob('6,18,30,42,54 * * * *', devmeetupSource.run)
 }
 
-app.listen(port, () => {
-  console.log('Express is listening on port ' + port)
-})
-
 if ( env.mode != 'dev' ) {
   // 임시 Https 프로토콜 연동
   const https = require('https')
@@ -68,3 +64,7 @@ if ( env.mode != 'dev' ) {
     console.log('Temp https server is listening on port ' + 8443)
   })
 }
+
+app.listen(port, () => {
+  console.log('Express is listening on port ' + port)
+})
