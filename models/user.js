@@ -26,8 +26,12 @@ class User {
     return this.count({ active: 1 })
   }
 
-  static getTagList () {
+  static getPosTagList () {
     return this.distinct('tags_pos')
+  }
+
+  static getNegTagList () {
+    return this.distinct('tags_neg')
   }
 }
 
