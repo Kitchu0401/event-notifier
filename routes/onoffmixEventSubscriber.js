@@ -54,7 +54,9 @@ router.get('/', function (req, res, next) {
           }
         },
         components: [
-          'navigator'
+          'navigator',
+          'login',
+          'guide'
         ]
       }
     })
