@@ -54,16 +54,18 @@ router.get('/', function (req, res, next) {
           }
         },
         components: [
-          'navigator',
-          'login',
-          'guide'
+          'form-login',
+          'form-tag',
+          'guide',
+          'list-event',
+          'list-tag',
+          'navigator'
         ]
       }
     })
   })
   .catch((error) => {
     console.error(error)
-    // res.render('event/subscriber')
   })   
 })
 
