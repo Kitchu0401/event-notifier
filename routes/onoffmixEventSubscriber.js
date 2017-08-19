@@ -8,25 +8,64 @@ const User = require('./../models/user')
 
 const router = express.Router()
 
+const TITLE = 'Event Notifier'
+
 router.get('/', function (req, res, next) {
   Promise.all([
     // 0: 최근 등록된 모임 목록
     Event.getRecentEventList(),
     // 1: 활성화된 구독자 숫자
     User.getUserCount(),
-    // 2: 등록된 키워드 목록
-    User.getTagList()
+    // 2: 등록된 구독 키워드 목록
+    User.getPosTagList(),
+    // 2: 등록된 무시 키워드 목록
+    User.getNegTagList()
   ])
   .then((resultList) => {
-    res.render('event/subscriber', {
-      eventList: resultList[0],
-      userCount: resultList[1],
-      tagCount: resultList[2].length
+    res.render('index', {
+      data: {
+        title: TITLE,
+        eventList: resultList[0],
+        userCount: resultList[1],
+        tagCount: resultList[2].length + resultList[3].length  
+      },
+      vue: {
+        head: {
+          title: TITLE,
+          meta: [
+            { property: 'og:title', content: TITLE },
+            { name: 'twitter:title', content: TITLE },
+            // Scripts
+            { script: '/event/subscriber/static/scripts/jquery-3.2.1.min.js' },
+            { script: '/event/subscriber/static/scripts/vue.min.js' },
+            // Styles
+            { rel: 'stylesheet', type: 'text/css', style: '/event/subscriber/static/styles/bulma.min.css' },
+            { rel: 'stylesheet', type: 'text/css', style: '/event/subscriber/static/styles/font-awesome.min.css' }
+          ],
+          structuredData: {
+            "@context": "http://schema.org",
+            "@type": "Organization",
+            "url": "http://kitchu.lazecrew.com/event/subscriber/"
+            // "contactPoint": [{
+            //     "@type": "ContactPoint",
+            //     "telephone": "+1-401-555-1212",
+            //     "contactType": "customer service"
+            // }]
+          }
+        },
+        components: [
+          'form-login',
+          'form-tag',
+          'guide',
+          'list-event',
+          'list-tag',
+          'navigator'
+        ]
+      }
     })
   })
   .catch((error) => {
     console.error(error)
-    res.render('event/subscriber')
   })   
 })
 
