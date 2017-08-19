@@ -1,5 +1,7 @@
 const express = require('express')
+const expressVue = require('express-vue')
 const logger = require('morgan')
+const path = require('path')
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 const bluebird = require('bluebird')
@@ -10,9 +12,19 @@ const env = require('./util/env')
 const app = express()
 const port = config.port || 8080
 
+// view engines
+app.engine('vue', expressVue);
+app.set('view engine', 'vue');
+app.set('views', path.join(__dirname, '/views'));
+app.set('vue', {
+    componentsDir: path.join(__dirname, '/views/components'),
+    defaultLayout: 'layout'
+});
+
+// app.set('view engine', 'pug')
+// app.set('views', 'views')
+
 // middlewares
-app.set('view engine', 'pug')
-app.set('views', 'views')
 app.use(logger('dev'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))

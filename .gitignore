@@ -1,5 +1,5 @@
 **/node_modules
-**/yarn.lock
 **/config.js
 **/*test*
-**.log
+**.log**
+**yarn**
